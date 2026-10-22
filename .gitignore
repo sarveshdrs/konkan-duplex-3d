@@ -1,0 +1,8 @@
+# Dependencies & Binaries
+.bin/
+*.tgz
+*.log
+
+# OS Metadata
+.DS_Store
+Thumbs.db

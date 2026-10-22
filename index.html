@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chiplun Konkan Duplex House - 3D Architectural Visualizer</title>
+  <meta name="description" content="Interactive 3D Architectural Design for Chiplun Family Home Konkan style duplex with rain-proof slanted terracotta roofs, open-to-below living room, and authentic timber craftsmanship.">
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js and OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- 3D Canvas Viewport -->
+    <div id="canvas-wrapper">
+      <canvas id="webgl-canvas"></canvas>
+
+      <!-- 3D Floating Room Label Tag -->
+      <div id="room-tag" class="room-3d-tag">Room</div>
+
+      <!-- Toast Message -->
+      <div id="toast" class="toast-msg">Exploded View Activated</div>
+
+      <!-- Weather Indicator Badge -->
+      <div class="weather-status">
+        <span class="weather-indicator" id="weather-dot"></span>
+        <span id="weather-text">Weather: Clear Daylight (Sunlit Facade)</span>
+      </div>
+
+      <!-- Top Header Navigation -->
+      <header class="top-header">
+        <div class="brand-badge">
+          <div class="icon-box">🏛️</div>
+          <div class="brand-title">
+            <h1>CHIPLUN FAMILY HOME</h1>
+            <p>30' × 30' Duplex • Konkan Slant Roof Architecture</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="pill-btn" id="btn-toggle-rain">
+            <span>🌧️</span> <span id="rain-btn-text">Monsoon Rain: OFF</span>
+          </button>
+          <button class="pill-btn" id="btn-toggle-lighting">
+            <span id="lighting-icon">☀️</span> <span id="lighting-text">Daylight</span>
+          </button>
+          <button class="pill-btn" id="btn-open-gallery">
+            <span>🖼️</span> <span>Photorealistic Renders</span>
+          </button>
+          <button class="pill-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
+            <span>📊</span> <span>Details</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Floating Camera Navigation (Left) -->
+      <nav class="floating-camera-nav">
+        <button class="cam-btn active" data-view="hero" data-tooltip="Exterior 3D Hero View">
+          <span>🏡</span>
+          <span class="label">Hero</span>
+        </button>
+        <button class="cam-btn" data-view="front" data-tooltip="Front Elevation View">
+          <span>📐</span>
+          <span class="label">Front</span>
+        </button>
+        <button class="cam-btn" data-view="top" data-tooltip="Top-Down Floor Plan">
+          <span>🧭</span>
+          <span class="label">Plan</span>
+        </button>
+        <button class="cam-btn" data-view="interior" data-tooltip="Double-Height Living & Mezzanine">
+          <span>🛋️</span>
+          <span class="label">Void</span>
+        </button>
+        <button class="cam-btn" data-view="drainage" data-tooltip="Slant Roof Rain Defense Analysis">
+          <span>💧</span>
+          <span class="label">Drain</span>
+        </button>
+        <button class="cam-btn" data-view="kitchen-exit" data-tooltip="Kitchen Exit & Bedroom 3 Balcony">
+          <span>🚪</span>
+          <span class="label">Exit</span>
+        </button>
+        <button class="cam-btn" id="btn-reset-cam" data-tooltip="Reset Camera">
+          <span>🔄</span>
+          <span class="label">Reset</span>
+        </button>
+      </nav>
+
+      <!-- Floating Bottom Control Dock -->
+      <div class="floating-dock">
+        <!-- Floor Level Visibility Group -->
+        <div class="dock-group">
+          <button class="dock-btn active" data-floor="full">
+            <span>🏠</span> Complete House
+          </button>
+          <button class="dock-btn" data-floor="roof-off">
+            <span>🪟</span> Roof Off (First Floor)
+          </button>
+          <button class="dock-btn" data-floor="ground">
+            <span>🚪</span> Ground Floor Only
+          </button>
+          <button class="dock-btn" data-floor="exploded">
+            <span>💥</span> Exploded Stack
+          </button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Material / Transparency Group -->
+        <div class="dock-group">
+          <button class="dock-btn" id="btn-xray">
+            <span>🔍</span> X-Ray Wireframe
+          </button>
+          <button class="dock-btn" id="btn-dimensions">
+            <span>📏</span> Dimensions: On
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Architectural Breakdown & Plan Analysis -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2><span>🏡</span> Project Specification</h2>
+        <button class="pill-btn" style="padding: 4px 10px; font-size: 11px;" id="btn-close-sidebar">✕</button>
+      </div>
+
+      <div class="sidebar-scroll">
+        <!-- Project Quick Stats -->
+        <div class="info-card">
+          <div class="card-title">Project Profile</div>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="label">Location</div>
+              <div class="val">Chiplun, Konkan</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Plot Footprint</div>
+              <div class="val">30' × 30' (900 ft²)</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Total Built-Up</div>
+              <div class="val">~1,580 sq ft</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Typology</div>
+              <div class="val">Duplex (Open Void)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Konkan Slanted Roof Rain Defense System -->
+        <div class="info-card" style="border-left: 3px solid var(--terracotta);">
+          <div class="card-title" style="color: #ff8c6b;">Konkan Slant Roof Rain Defense</div>
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-bullet">1</div>
+              <div><strong>38° Sloping Pitch:</strong> Chiplun receives >3,500 mm annual monsoon precipitation. Steep pitch prevents pooling, algae formation, and water seepage.</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-bullet">2</div>
+              <div><strong>Mangalore Red Clay Tiles:</strong> Interlocking terracotta tiles channel heavy downpours rapidly while providing natural passive thermal cooling in hot coastal summers.</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-bullet">3</div>
+              <div><strong>3.5 ft Deep Eaves (Chajjas):</strong> Extra-wide overhangs shield exterior plaster and open wooden balconies from aggressive driving coastal monsoon winds.</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-bullet">4</div>
+              <div><strong>Laterite Stone Plinth:</strong> 2.5 ft elevated foundation base built from local porous Chira (red laterite) stone safeguards against ground splashing and flooding.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Room Explorer -->
+        <div class="info-card">
+          <div class="card-title">Room Schedule & Layout</div>
+          <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px;">Click any room below to focus and inspect in 3D:</p>
+
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent-gold); margin: 8px 0 4px; text-transform: uppercase;">Ground Level (G.L.)</div>
+          <div class="room-pills">
+            <div class="room-pill" data-room="porch">
+              <span class="room-name"><span>🏛️</span> Front Porch (Left Facade)</span>
+              <span class="room-area">14' × 5'</span>
+            </div>
+            <div class="room-pill" data-room="living">
+              <span class="room-name"><span>🛋️</span> Living Room (Double Height)</span>
+              <span class="room-area">241 ft²</span>
+            </div>
+            <div class="room-pill" data-room="pooja">
+              <span class="room-name"><span>🪔</span> Pooja Mandir</span>
+              <span class="room-area">6' × 2'</span>
+            </div>
+            <div class="room-pill" data-room="kitchen">
+              <span class="room-name"><span>🍳</span> Kitchen & Store</span>
+              <span class="room-area">184 ft²</span>
+            </div>
+            <div class="room-pill" data-room="kitchen-exit">
+              <span class="room-name"><span>🚪</span> Kitchen Exit Door & Steps</span>
+              <span class="room-area">5' × 11' Yard</span>
+            </div>
+            <div class="room-pill" data-room="bed1">
+              <span class="room-name"><span>🛏️</span> Master Bedroom 1 (Right Facade)</span>
+              <span class="room-area">230 ft²</span>
+            </div>
+            <div class="room-pill" data-room="toilet-ground">
+              <span class="room-name"><span>🚿</span> Attached & Common Toilet</span>
+              <span class="room-area">55 ft²</span>
+            </div>
+            <div class="room-pill" data-room="stairs">
+              <span class="room-name"><span>🪜</span> Doglegged Staircase</span>
+              <span class="room-area">90 ft²</span>
+            </div>
+          </div>
+
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent-gold); margin: 14px 0 4px; text-transform: uppercase;">First Level (F.L.)</div>
+          <div class="room-pills">
+            <div class="room-pill" data-room="void">
+              <span class="room-name"><span>✨</span> Open to Below (Mezzanine Void)</span>
+              <span class="room-area">17' × 14'</span>
+            </div>
+            <div class="room-pill" data-room="passage">
+              <span class="room-name"><span>🚶</span> Upper Gallery Passage</span>
+              <span class="room-area">17' × 3'3"</span>
+            </div>
+            <div class="room-pill" data-room="bed2">
+              <span class="room-name"><span>🛏️</span> Bedroom 2 (Master Suite)</span>
+              <span class="room-area">204 ft²</span>
+            </div>
+            <div class="room-pill" data-room="balcony-bed2">
+              <span class="room-name"><span>🌿</span> Bed 2 Private Balcony (European Door)</span>
+              <span class="room-area">14' × 5'</span>
+            </div>
+            <div class="room-pill" data-room="toilet-first">
+              <span class="room-name"><span>🚿</span> Toilet (Attached Bed 2)</span>
+              <span class="room-area">35 ft²</span>
+            </div>
+            <div class="room-pill" data-room="bed3">
+              <span class="room-name"><span>🛏️</span> Bedroom 3 (European French Door)</span>
+              <span class="room-area">147 ft²</span>
+            </div>
+            <div class="room-pill" data-room="balcony-front">
+              <span class="room-name"><span>🌿</span> Upper Mezzanine Balcony</span>
+              <span class="room-area">14' × 5'</span>
+            </div>
+            <div class="room-pill" data-room="balcony-rear">
+              <span class="room-name"><span>🌿</span> Bed 3 Private Balcony (European Door)</span>
+              <span class="room-area">5' × 11'</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Room Detail Panel -->
+        <div class="info-card" id="room-detail-card" style="display: none;">
+          <div class="card-title" id="room-detail-title">Room Information</div>
+          <p id="room-detail-desc" style="font-size: 12px; color: var(--text-muted); line-height: 1.5;"></p>
+          <div style="margin-top: 10px; font-size: 11px; color: var(--accent-gold); font-weight: 600;" id="room-detail-vastu"></div>
+        </div>
+
+        <!-- Architectural Compliance & Priority Verification -->
+        <div class="info-card" style="border-left: 3px solid var(--accent-gold);">
+          <div class="card-title" style="color: var(--accent-gold);">Strict Architectural Compliance</div>
+          <div class="feature-list" style="font-size: 11px;">
+            <div class="feature-item">
+              <div class="feature-bullet" style="background: rgba(229, 169, 60, 0.2); color: var(--accent-gold);">P1</div>
+              <div><strong>Floor Plan Priority:</strong> 30'×30' footprint, 14' 1½" left front porch with 2 columns, double-height living room (241 ft²), open-to-below void, 90 ft² doglegged stairs with store, ground bedroom, kitchen (184 ft²) with side door, first-floor front balcony & side balcony exactly matching Drawing A100.</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-bullet" style="background: rgba(217, 83, 51, 0.2); color: var(--terracotta);">P2</div>
+              <div><strong>Exterior Reference Style:</strong> 38° sloping Mangalore clay tile roof with hipped eaves and dormer ridge, warm beige stone/brick cladding panels, cream stucco walls, dark teakwood columns with charupadi bench seating, and dark-framed windows.</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-bullet" style="background: rgba(56, 189, 248, 0.2); color: var(--accent-cyan);">P3</div>
+              <div><strong>Full Interior Furnishings:</strong> Living room sectional sofa, TV console, traditional pooja mandir, modular kitchen with black granite counters and dining table, fully furnished master and secondary bedrooms with custom wardrobes.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Materials & Construction Palette -->
+        <div class="info-card">
+          <div class="card-title">Authentic Materials</div>
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-bullet" style="background: rgba(158, 61, 36, 0.2); color: #e26244;">🧱</div>
+              <div><strong>Red Laterite (Chira Stone):</strong> Quoins, boundary walls, and foundation plinth; naturally moisture resistant.</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-bullet" style="background: rgba(138, 82, 41, 0.2); color: #d68748;">🪵</div>
+              <div><strong>Teakwood (Sagwan):</strong> Porch pillars with carved capitals, door frames, stairs, and balcony railings.</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-bullet" style="background: rgba(217, 83, 51, 0.2); color: #ff8c6b;">🏠</div>
+              <div><strong>Mangalore Clay Tiles:</strong> Kiln-fired terracotta interlocking roof tiles with clay ridge caps and apex crests.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal Gallery for Photorealistic Renders & Plan Comparison -->
+  <div class="modal-overlay" id="gallery-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3>🏛️ 3D Architectural Visualizations & Renders</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Based on CHIPLUN DESIGN OPT 4.pdf & Konkan Style Exterior Reference</p>
+        </div>
+        <button class="modal-close" id="btn-close-gallery">✕</button>
+      </div>
+
+      <!-- Gallery Filter Tabs -->
+      <div class="gallery-tabs">
+        <button class="gallery-tab active" data-filter="all">All Renders (10)</button>
+        <button class="gallery-tab" data-filter="exterior">Exteriors (2)</button>
+        <button class="gallery-tab" data-filter="cutaway">3D Cutaways (3)</button>
+        <button class="gallery-tab" data-filter="interior">Furnished Interiors (3)</button>
+        <button class="gallery-tab" data-filter="plan">Floor Plan & Reference (2)</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="gallery-grid" id="gallery-container">
+          <!-- View 1: Front Exterior -->
+          <div class="gallery-item" data-category="exterior" onclick="openLightbox('assets/chiplun_front_exterior_1792671281774.jpg', '1. Photorealistic Front Exterior Perspective', 'Exact 30ft elevation following Drawing A100: Left front porch (14\' 1½\" × 5\') with 2 carved dark teak columns, charupadi bench seating, entrance door into living room, right ground bedroom window with warm beige brick/stone cladding, upper front balcony directly over porch with dark wood balustrade, upper bedroom 2 window, and authentic multi-tiered sloping Mangalore terracotta tiled roof with dormer ridge vent.')">
+            <div class="badge-tag">View 1 • Front Elevation</div>
+            <img src="assets/chiplun_front_exterior_1792671281774.jpg" alt="Front Exterior Perspective">
+            <div class="meta">
+              <h4>1. Photorealistic Front Exterior Perspective</h4>
+              <p>Precise front elevation matching the floor plan: left entrance porch, right ground bedroom window with stone cladding, upper balcony, and terracotta roof.</p>
+            </div>
+          </div>
+
+          <!-- View 2: Front Three-Quarter -->
+          <div class="gallery-item" data-category="exterior" onclick="openLightbox('assets/chiplun_three_quarter_1792671303257.jpg', '2. Front Three-Quarter Perspective (30\' × 30\' Proportions)', 'Full 3D volumetric view showing the 30\' × 30\' building proportions. Displays the front porch and right-side elevation with kitchen service exit, upper side balcony along Bedroom 3, 38° rain shedding terracotta roof slopes, deep overhanging eaves, and warm evening lighting.')">
+            <div class="badge-tag">View 2 • 3/4 Perspective</div>
+            <img src="assets/chiplun_three_quarter_1792671303257.jpg" alt="Front Three-Quarter Perspective">
+            <div class="meta">
+              <h4>2. Front Three-Quarter Perspective</h4>
+              <p>Shows actual 30' × 30' proportions, roof geometry, front porch, and right-side elevation with kitchen service door and upper side balcony.</p>
+            </div>
+          </div>
+
+          <!-- View 3: Ground Floor Cutaway -->
+          <div class="gallery-item" data-category="cutaway" onclick="openLightbox('assets/chiplun_ground_cutaway_1792671329902.jpg', '3. Furnished Ground-Floor 3D Cutaway', 'Bird\'s-eye cutaway at 4ft wall height revealing the complete ground level from Drawing A100: Entrance porch with 2 dark wood columns, 241 sq ft living room with sofa set and TV unit, pooja mandir niche, 20-step doglegged staircase with under-stair store, bedroom 1 with double bed and wardrobe, attached toilet, common toilet, and 184 sq ft kitchen with black granite counters, dining table, and side service door.')">
+            <div class="badge-tag">View 3 • Ground Cutaway</div>
+            <img src="assets/chiplun_ground_cutaway_1792671329902.jpg" alt="Furnished Ground Floor Cutaway">
+            <div class="meta">
+              <h4>3. Furnished Ground-Floor 3D Cutaway</h4>
+              <p>Shows Porch, Living Room (241 ft²), Pooja Mandir, Staircase & Store, Bedroom 1, Attached & Common Toilets, Kitchen & Dining (184 ft²).</p>
+            </div>
+          </div>
+
+          <!-- View 4: First Floor Cutaway -->
+          <div class="gallery-item" data-category="cutaway" onclick="openLightbox('assets/chiplun_first_cutaway_1792671355148.jpg', '4. Furnished First-Floor 3D Cutaway', 'Reveals the upper level of the duplex: Front balcony above the porch, Open to Below double-height void (17\' × 10\' 6\") looking down into living room with dark wood railing, upper gallery passage, Master Bedroom 2 (197 sq ft) with attached bath (47 sq ft), Bedroom 3 (147 sq ft) with study desk, and long outdoor side balcony.')">
+            <div class="badge-tag">View 4 • First Floor Cutaway</div>
+            <img src="assets/chiplun_first_cutaway_1792671355148.jpg" alt="Furnished First Floor Cutaway">
+            <div class="meta">
+              <h4>4. Furnished First-Floor 3D Cutaway</h4>
+              <p>Highlights Front Balcony, Open-to-Below Void with wood balustrade, Master Bedroom 2 with en-suite bath, Bedroom 3, and Side Balcony.</p>
+            </div>
+          </div>
+
+          <!-- View 5: Complete Isometric View -->
+          <div class="gallery-item" data-category="cutaway" onclick="openLightbox('assets/chiplun_isometric_duplex_1792671378511.jpg', '5. Complete Isometric View Showing Both Floors & Open Void', 'Architectural axonometric cutaway illustrating both floors simultaneously: the vertical connection between the ground living room and upper open-to-below mezzanine, doglegged staircase, upper bridge, bedroom suites, and the traditional 38° sloping Mangalore clay tile roof structure with exposed timber trusses.')">
+            <div class="badge-tag">View 5 • Dual Floor Isometric</div>
+            <img src="assets/chiplun_isometric_duplex_1792671378511.jpg" alt="Complete Isometric Duplex View">
+            <div class="meta">
+              <h4>5. Complete Isometric View (Both Floors)</h4>
+              <p>Dual-level perspective revealing the open-to-below volume connecting both floors, timber roof truss structure, and full spatial flow.</p>
+            </div>
+          </div>
+
+          <!-- View 6a: Living Room Interior -->
+          <div class="gallery-item" data-category="interior" onclick="openLightbox('assets/chiplun_living_interior_1792671407411.jpg', '6a. Double-Height Living Room Interior Perspective', 'Interior perspective of the 241 sq ft living room looking up at the dramatic double-height ceiling with exposed dark teak rafters, first-floor mezzanine bridge with turned wooden balustrade, glowing pooja mandir niche, ascending staircase, luxury sectional sofa, TV wall console, and modern brass chandelier.')">
+            <div class="badge-tag">View 6a • Living Room Interior</div>
+            <img src="assets/chiplun_living_interior_1792671407411.jpg" alt="Living Room Double Height Interior">
+            <div class="meta">
+              <h4>6a. Double-Height Living Room Interior</h4>
+              <p>Looking up at the open mezzanine void, timber rafters, doglegged staircase, illuminated pooja mandir, and modern luxury furnishings.</p>
+            </div>
+          </div>
+
+          <!-- View 6b: Kitchen Interior -->
+          <div class="gallery-item" data-category="interior" onclick="openLightbox('assets/chiplun_kitchen_interior_1792671430069.jpg', '6b. Coastal Modular Kitchen & Dining Perspective', 'Interior view of the 184 sq ft kitchen: Teakwood and cream modular cabinetry with brass hardware, polished black granite counters, undermount double sink, built-in gas hob and stainless chimney hood, refrigerator, solid wood dining table with chairs, and rear utility exit door.')">
+            <div class="badge-tag">View 6b • Kitchen & Dining</div>
+            <img src="assets/chiplun_kitchen_interior_1792671430069.jpg" alt="Modular Kitchen & Dining Interior">
+            <div class="meta">
+              <h4>6b. Modular Kitchen & Dining Interior</h4>
+              <p>Teak and cream modular cabinetry, black granite countertop, hob, chimney, double refrigerator, dining set, and side garden exit.</p>
+            </div>
+          </div>
+
+          <!-- View 6c: Bedroom Interior -->
+          <div class="gallery-item" data-category="interior" onclick="openLightbox('assets/chiplun_bedroom_interior_1792671453626.jpg', '6c. Master Bedroom Suite Interior Perspective', 'Upper master bedroom (Bedroom 2, 197 sq ft): Vaulted timber ceiling following the roofline with warm indirect cove lighting, king-sized teakwood bed with upholstered headboard, sliding wardrobe, bedside lamps, vanity mirror, and window with sheer curtains framing lush coconut palms.')">
+            <div class="badge-tag">View 6c • Master Bedroom</div>
+            <img src="assets/chiplun_bedroom_interior_1792671453626.jpg" alt="Master Bedroom Suite Interior">
+            <div class="meta">
+              <h4>6c. Master Bedroom Suite Interior</h4>
+              <p>Vaulted ceiling with exposed teak rafters, king bed, full-height sliding wardrobe, cove lighting, and views of Konkan greenery.</p>
+            </div>
+          </div>
+
+          <!-- Reference 1: Original Floor Plan -->
+          <div class="gallery-item" data-category="plan" onclick="openLightbox('assets/chiplun_floor_plan.png', 'Authoritative Source: CHIPLUN DESIGN OPT 4.pdf (Drawing A100)', 'Original architectural drawing A100 showing Ground Level (1) and First Level (2) for client Supriya Ghag. Defines the exact 30\' × 30\' footprint, 14\' 1½\" front porch, 241 ft² living room, pooja alcove, 90 ft² staircase, kitchen (184 ft²), bedroom 1, bedroom 2 (197 ft²), bedroom 3 (147 ft²), front balcony, side balcony, and open-to-below void.')">
+            <div class="badge-tag" style="background: rgba(56, 189, 248, 0.9);">Plan Source • Drawing A100</div>
+            <img src="assets/chiplun_floor_plan.png" alt="Original Floor Plan Drawing A100">
+            <div class="meta">
+              <h4>Authoritative Architectural Floor Plan</h4>
+              <p>Drawing A100: Ground Level (1) & First Level (2) specifying exact dimensions, room positions, stairs, and open-to-below void.</p>
+            </div>
+          </div>
+
+          <!-- Reference 2: Exterior Reference Photograph -->
+          <div class="gallery-item" data-category="plan" onclick="openLightbox('assets/reference_exterior_style.jpg', 'Style Reference: Traditional Konkan / Kerala Residential Architecture', 'Exterior reference photograph used exclusively for facade materials, textures, colors, and roofing: Mangalore terracotta sloping tiles, warm beige stone cladding panels, cream walls, dark wood carved columns, charupadi bench seating, and dark timber railings.')">
+            <div class="badge-tag" style="background: rgba(229, 169, 60, 0.9);">Style Reference • Materials & Roof</div>
+            <img src="assets/reference_exterior_style.jpg" alt="Exterior Reference Photograph">
+            <div class="meta">
+              <h4>Exterior Reference Photograph</h4>
+              <p>Used solely for exterior facade styling, Mangalore terracotta roof tiles, beige stone cladding, and dark wood detailing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Image Lightbox Modal -->
+  <div class="lightbox-overlay" id="lightbox-modal">
+    <div class="lightbox-content">
+      <button class="lightbox-close" id="btn-close-lightbox">✕</button>
+      <img id="lightbox-img" src="" alt="Enlarged Render">
+      <div class="lightbox-info">
+        <h3 id="lightbox-title">Image Title</h3>
+        <p id="lightbox-desc">Image Description</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
