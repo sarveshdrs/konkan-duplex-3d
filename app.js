@@ -101,15 +101,15 @@ const roomDataMap = {
     vastu: 'Direction: Northwest (Vayavya Corner) | Air Element & Peaceful Rest'
   },
   'balcony-front': {
-    name: 'Upper Mezzanine Family Balcony (Left Facade)',
-    area: '14\' 1½" × 5\' 0" (71 ft²)',
-    desc: 'Positioned on the front left above the porch, sheltered by the upper roof gable and ornamental dormer vent. Directly accessible from the upper mezzanine gallery lobby via glazed double French doors. Features carved solid teak balustrades and turned pillars.',
-    vastu: 'Direction: East-Southeast | Morning Sun & Coastal Breeze'
+    name: 'First Floor Grand Front Balcony (Unified Full Facade)',
+    area: '29\' 0" × 5\' 0" (145 ft²)',
+    desc: 'Expansive unified front balcony spanning the entire 29.2 ft first-floor facade, created by joining the mezzanine and bedroom balconies into one seamless continuous terrace. Accessible both from the Mezzanine Gallery via glazed double French doors and directly from Bedroom 2 via its authentic European full-glass French door with cremone bolts. Features continuous solid teak balustrades, a colonnade of four carved Sagwan teak pillars, warm teak paneled ceiling, outdoor bistro lounge seating, and an ornamental triangular dormer gablette overlooking the landscaped grounds.',
+    vastu: 'Direction: East-Southeast / Front Elevation | Full Frontal Prana & Abundant Morning Coastal Breeze'
   },
   'balcony-bed2': {
-    name: 'Bedroom 2 Private Balcony (European Full-Glass French Door)',
-    area: '14\' 0" × 5\' 0" (70 ft²)',
-    desc: 'Bedroom 2\'s own exclusive private balcony directly accessible from the room via an authentic European-style full-glass French door (porte-fenêtre) with floor-to-ceiling clear glazing and polished brass cremone bolt (espagnolette) hardware. Sheltered under the sloping terracotta roof canopy, flanked by carved solid teak pillars, featuring a private outdoor teak bistro table, armchairs, and flowering terracotta planters overlooking the Konkan grounds.',
+    name: 'First Floor Grand Front Balcony (Bedroom 2 Walkout)',
+    area: '29\' 0" × 5\' 0" (145 ft²)',
+    desc: 'Direct walkout from Bedroom 2 onto the grand unified front balcony via an authentic European-style full-glass French door (porte-fenêtre) with floor-to-ceiling clear glazing and polished brass cremone bolt (espagnolette) hardware. The balcony extends continuously across the entire front facade, sheltered under the sloping terracotta roof canopy and colonnade of carved Sagwan teak pillars.',
     vastu: 'Direction: South-Southeast / Front Elevation | Private Sunrise Views & Natural Cross-Ventilation'
   },
   'balcony-rear': {
@@ -493,9 +493,9 @@ function init() {
   scene.background = new THREE.Color(0xa4c6e8);
   scene.fog = new THREE.FogExp2(0xa4c6e8, 0.002);
 
-  // Camera: Framed from front eye-level matching reference photo exactly
+  // Camera: Framed from dynamic 3D perspective showing front facade and roof depth
   camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.5, 1000);
-  camera.position.set(0.5, 13.5, 52.0);
+  camera.position.set(-34.0, 20.0, 42.0);
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -1272,18 +1272,18 @@ function buildHouseModel() {
   porchBeam.castShadow = true;
   groundFloorGroup.add(porchBeam);
 
-  // CONTINUOUS GROUND FLOOR SLOPING TERRACOTTA ROOF EAVE (Spans across Porch & Master Bedroom 1)
-  const frontRoofGeo = new THREE.BoxGeometry(31.2, 0.55, 5.5);
-  const frontRoof = new THREE.Mesh(frontRoofGeo, materials.roofTile);
-  frontRoof.position.set(0, 10.8, 14.8);
-  frontRoof.rotation.x = THREE.MathUtils.degToRad(22);
-  frontRoof.castShadow = true;
-  groundFloorGroup.add(frontRoof);
+  // GROUND FLOOR SLOPING TERRACOTTA ROOF EAVE (ONLY in front of Porch, NOT in front of Master Bedroom 1)
+  const porchRoofGeo = new THREE.BoxGeometry(15.2, 0.55, 5.5);
+  const porchRoof = new THREE.Mesh(porchRoofGeo, materials.roofTile);
+  porchRoof.position.set(-7.3, 10.8, 14.8);
+  porchRoof.rotation.x = THREE.MathUtils.degToRad(22);
+  porchRoof.castShadow = true;
+  groundFloorGroup.add(porchRoof);
 
-  const frontSoffit = new THREE.Mesh(new THREE.BoxGeometry(31.4, 0.2, 5.6), materials.whiteSoffit);
-  frontSoffit.position.set(0, 10.55, 14.8);
-  frontSoffit.rotation.x = THREE.MathUtils.degToRad(22);
-  groundFloorGroup.add(frontSoffit);
+  const porchSoffit = new THREE.Mesh(new THREE.BoxGeometry(15.4, 0.2, 5.6), materials.whiteSoffit);
+  porchSoffit.position.set(-7.3, 10.55, 14.8);
+  porchSoffit.rotation.x = THREE.MathUtils.degToRad(22);
+  groundFloorGroup.add(porchSoffit);
 
   // (C) Exterior & Interior Walls (Ground Floor: Y: 2.5 to 10.5, Height = 8)
   buildGroundWalls(groundFloorGroup);
@@ -1322,10 +1322,10 @@ function buildHouseModel() {
   slabPassage.receiveShadow = true;
   firstFloorGroup.add(slabPassage);
 
-  // 4. Front Balcony Slab (above porch: X: -15 to 0, Z: 9.6 to 14.6)
-  const slabBalconyGeo = new THREE.BoxGeometry(15, 0.6, 5.0);
+  // 4. Single Large Unified Front Balcony Slab (spanning entire front: X: -14.8 to +14.8, Z: 9.6 to 14.6)
+  const slabBalconyGeo = new THREE.BoxGeometry(29.6, 0.6, 5.0);
   const slabBalcony = new THREE.Mesh(slabBalconyGeo, materials.floorTerracotta);
-  slabBalcony.position.set(-7.5, 10.5, 12.1);
+  slabBalcony.position.set(0, 10.5, 12.1);
   slabBalcony.receiveShadow = true;
   firstFloorGroup.add(slabBalcony);
 
@@ -1333,15 +1333,12 @@ function buildHouseModel() {
   buildRailing(firstFloorGroup, -4, 10.8, -4, -4, 10.8, 10, 'mezzanine');
   buildRailing(firstFloorGroup, -4, 10.8, 10, 0, 10.8, 10, 'mezzanine');
 
-  // Left Front Balcony Railings (Mezzanine Family Lounge)
-  buildRailing(firstFloorGroup, -14.6, 10.8, 14.6, -0.4, 10.8, 14.6, 'balcony'); // Across front
-  buildRailing(firstFloorGroup, -14.6, 10.8, 9.6, -14.6, 10.8, 14.6, 'balcony'); // Left side
+  // Single Large Unified Front Balcony Railings (Seamless continuous front balustrade!)
+  buildRailing(firstFloorGroup, -14.6, 10.8, 14.6, 14.6, 10.8, 14.6, 'balcony'); // Continuous across entire 29.2 ft front!
+  buildRailing(firstFloorGroup, -14.6, 10.8, 9.6, -14.6, 10.8, 14.6, 'balcony');   // Left return
+  buildRailing(firstFloorGroup, 14.6, 10.8, 9.6, 14.6, 10.8, 14.6, 'balcony');    // Right return
 
-  // Bedroom 2 OWN PRIVATE BALCONY Railings!
-  buildRailing(firstFloorGroup, 0.4, 10.8, 14.6, 14.6, 10.8, 14.6, 'balcony'); // Across front
-  buildRailing(firstFloorGroup, 14.6, 10.8, 9.6, 14.6, 10.8, 14.6, 'balcony'); // Right side
-
-  // Two Upper Balcony Dark Carved Pillars on Left Balcony
+  // Four Symmetrically Spaced Dark Carved Teak Pillars across the Single Large Balcony
   const colUpperGeo = new THREE.CylinderGeometry(0.5, 0.58, 8.5, 16);
   const colU1 = new THREE.Mesh(colUpperGeo, materials.darkTeakWood);
   colU1.position.set(-13.5, 15.0, 14.2);
@@ -1349,13 +1346,12 @@ function buildHouseModel() {
   firstFloorGroup.add(colU1);
 
   const colU2 = new THREE.Mesh(colUpperGeo, materials.darkTeakWood);
-  colU2.position.set(-0.8, 15.0, 14.2);
+  colU2.position.set(-4.5, 15.0, 14.2);
   colU2.castShadow = true;
   firstFloorGroup.add(colU2);
 
-  // Two Upper Balcony Dark Carved Pillars on Bedroom 2 Private Balcony (Symmetrical & grand!)
   const colU3 = new THREE.Mesh(colUpperGeo, materials.darkTeakWood);
-  colU3.position.set(0.8, 15.0, 14.2);
+  colU3.position.set(4.5, 15.0, 14.2);
   colU3.castShadow = true;
   firstFloorGroup.add(colU3);
 
@@ -1363,6 +1359,12 @@ function buildHouseModel() {
   colU4.position.set(13.5, 15.0, 14.2);
   colU4.castShadow = true;
   firstFloorGroup.add(colU4);
+
+  // Grand Balcony Teak Header Beam connecting all 4 pillars
+  const grandBalcBeam = new THREE.Mesh(new THREE.BoxGeometry(29.6, 0.7, 0.8), materials.darkTeakWood);
+  grandBalcBeam.position.set(0, 19.1, 14.2);
+  grandBalcBeam.castShadow = true;
+  firstFloorGroup.add(grandBalcBeam);
 
   // Left First-Floor Open Terrace Parapet (horizontal railing matching photo)
   const terraceParapet = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.8, 4.0), materials.wallExterior);
@@ -1834,14 +1836,11 @@ function buildFirstFloorWalls(parent) {
   }
 
   // ========================================================
-  // BEDROOM 2 PRIVATE BALCONY & EUROPEAN FULL-GLASS FRENCH DOOR
-  // Bedroom 2 has its OWN PRIVATE BALCONY directly accessible from the room!
+  // SINGLE LARGE UNIFIED FIRST-FLOOR FRONT BALCONY (Full Facade: X: -14.8 to +14.8)
+  // Joined into a single expansive terrace seamlessly connecting Bedroom 2 and Mezzanine Gallery!
   // ========================================================
 
-  // Privacy Wall separating Left Family Balcony from Bedroom 2 Private Balcony (X = 0, Z: 9.6 to 14.6)
-  addWall(0, y, 12.1, 0.8, h, 5.0, true);
-
-  // Bedroom 2 Front Wall (Z = 9.6): Features the European Full-Glass French Door opening onto the Private Balcony!
+  // Bedroom 2 Front Wall (Z = 9.6): Features the European Full-Glass French Door opening onto the Grand Balcony!
   // Left wall section (X: 0 to 4.0)
   addWall(2.0, y, 9.6, 4.0, h, 0.8, true);
   // Right wall section (X: 10.6 to 14.6)
@@ -1849,21 +1848,15 @@ function buildFirstFloorWalls(parent) {
   // Lintel above European French door (Y: 17.6 to 19.5, height = 1.9 ft, X: 4.0 to 10.6)
   addWall(7.3, 18.55, 9.6, 6.6, 1.9, 0.8, true);
 
-  // Authentic European Full-Glass French Balcony Door (porte-fenêtre) opening directly from Bedroom 2 onto its private balcony!
+  // Authentic European Full-Glass French Balcony Door (porte-fenêtre) opening directly from Bedroom 2 onto the grand balcony!
   addEuropeanFullGlassFrenchDoor(parent, 7.3, 10.8, 9.6, 6.6, 6.8, 'front', -38);
 
   // Stone Cladding Accent Panels flanking the European French door on Bedroom 2's front wall
   addStoneCladdingPanel(parent, 2.0, 14.8, 9.95, 3.4, 5.8);
   addStoneCladdingPanel(parent, 12.6, 14.8, 9.95, 3.4, 5.8);
 
-  // Bedroom 2 Private Balcony Outdoor Furniture (Bistro Table, Armchairs & Flowering Bougainvillea Planter)
+  // Grand Balcony Outdoor Furniture (Teak Bistro Table, Armchairs & Flowering Bougainvillea Planter)
   buildBalconyOutdoorFurniture(parent, 7.3, 10.8, 12.2);
-
-  // Warm Teak Paneled Ceiling under Balcony Roof on Bedroom 2's Private Balcony
-  const b2CeilingGeo = new THREE.BoxGeometry(14.5, 0.3, 5.2);
-  const b2Ceiling = new THREE.Mesh(b2CeilingGeo, materials.darkTeakWood);
-  b2Ceiling.position.set(7.3, 19.3, 12.1);
-  parent.add(b2Ceiling);
 
   // Front Wall at Balcony (X: -15 to 0, Z = 9.6)
   // Completely enclosed with glazed double balcony doors and sidelights
@@ -1893,11 +1886,11 @@ function buildFirstFloorWalls(parent) {
   addPhotoMatchingWindow(parent, -11.5, 15.0, 9.8, 2.8, 4.2); // Left sidelight
   addPhotoMatchingWindow(parent, -2.2, 15.0, 9.8, 2.4, 4.2);  // Right sidelight
 
-  // (3) Warm Dark Teak Paneled Ceiling under Balcony Roof
-  const balcCeilingGeo = new THREE.BoxGeometry(15.2, 0.3, 6.0);
-  const balcCeiling = new THREE.Mesh(balcCeilingGeo, materials.darkTeakWood);
-  balcCeiling.position.set(-7.25, 19.3, 12.5);
-  parent.add(balcCeiling);
+  // (3) Single Large Unified Dark Teak Paneled Ceiling under Balcony Roof (Spanning full 29.6 ft width)
+  const grandBalcCeilingGeo = new THREE.BoxGeometry(29.6, 0.3, 5.5);
+  const grandBalcCeiling = new THREE.Mesh(grandBalcCeilingGeo, materials.darkTeakWood);
+  grandBalcCeiling.position.set(0, 19.3, 12.1);
+  parent.add(grandBalcCeiling);
 
   // Interior Partitions:
   // Wall between Bedroom 2 and Bedroom 3 (Z = 0, X: 0 to 15)
@@ -1910,12 +1903,6 @@ function buildFirstFloorWalls(parent) {
 
   // Attached toilet partition in Bedroom 2
   addWall(4.5, y, 4.5, 0.5, h, 7, false);
-
-  // (6) Horizontal Dark Brown Fascia Trim Band under Roofline (matching reference photo)
-  const darkBandGeo = new THREE.BoxGeometry(15.2, 0.75, 0.25);
-  const darkBand = new THREE.Mesh(darkBandGeo, materials.darkTrimBand);
-  darkBand.position.set(7.3, 18.6, 14.8);
-  parent.add(darkBand);
 
   // Upper Side & Rear Windows with Chajjas
   addWindowWithChajja(parent, 15.2, 15.2, 5.0, 4.0, 3.5, 'side-right'); // Bed 2 side window
@@ -2105,14 +2092,15 @@ function buildKonkanSlantRoof(parent) {
   const ridgeY = 27.8;
 
   // ========================================================
+  // ========================================================
   // TIER 2: UPPER BALCONY PROJECTING HIPPED ROOF + DORMER
-  // (Directly over the first-floor balcony, supported by upper dark columns)
+  // (Directly over the single large unified first-floor balcony, supported by upper teak columns)
   // ========================================================
   const balcRoofGroup = new THREE.Group();
-  balcRoofGroup.position.set(-7.25, 0, 13.0);
+  balcRoofGroup.position.set(0, 0, 13.0);
 
-  // Balcony Main Forward Sloping Canopy
-  const balcFrontSlopeGeo = new THREE.BoxGeometry(17.5, 0.55, 6.2);
+  // Balcony Main Forward Sloping Canopy (Spanning full 32.0 ft front facade!)
+  const balcFrontSlopeGeo = new THREE.BoxGeometry(32.0, 0.55, 6.2);
   const balcFrontSlope = new THREE.Mesh(balcFrontSlopeGeo, materials.roofTile);
   balcFrontSlope.position.set(0, 21.6, 1.8);
   balcFrontSlope.rotation.x = THREE.MathUtils.degToRad(24);
@@ -2120,7 +2108,7 @@ function buildKonkanSlantRoof(parent) {
   balcRoofGroup.add(balcFrontSlope);
 
   // White soffit fascia underneath balcony front slope
-  const balcFrontSoffit = new THREE.Mesh(new THREE.BoxGeometry(17.7, 0.25, 6.3), materials.whiteSoffit);
+  const balcFrontSoffit = new THREE.Mesh(new THREE.BoxGeometry(32.2, 0.25, 6.3), materials.whiteSoffit);
   balcFrontSoffit.position.set(0, 21.3, 1.8);
   balcFrontSoffit.rotation.x = THREE.MathUtils.degToRad(24);
   balcRoofGroup.add(balcFrontSoffit);
@@ -2128,7 +2116,7 @@ function buildKonkanSlantRoof(parent) {
   // Balcony Left Hip Slope
   const balcLeftSlopeGeo = new THREE.BoxGeometry(5.2, 0.55, 6.8);
   const balcLeftSlope = new THREE.Mesh(balcLeftSlopeGeo, materials.roofTile);
-  balcLeftSlope.position.set(-7.0, 21.8, 0.2);
+  balcLeftSlope.position.set(-14.8, 21.8, 0.2);
   balcLeftSlope.rotation.z = THREE.MathUtils.degToRad(-24);
   balcLeftSlope.castShadow = true;
   balcRoofGroup.add(balcLeftSlope);
@@ -2136,13 +2124,13 @@ function buildKonkanSlantRoof(parent) {
   // Balcony Right Hip Slope
   const balcRightSlopeGeo = new THREE.BoxGeometry(5.2, 0.55, 6.8);
   const balcRightSlope = new THREE.Mesh(balcRightSlopeGeo, materials.roofTile);
-  balcRightSlope.position.set(7.0, 21.8, 0.2);
+  balcRightSlope.position.set(14.8, 21.8, 0.2);
   balcRightSlope.rotation.z = THREE.MathUtils.degToRad(24);
   balcRightSlope.castShadow = true;
   balcRoofGroup.add(balcRightSlope);
 
   // Balcony Roof Ridge
-  const balcRidge = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 14.5, 12), materials.roofRidge);
+  const balcRidge = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 29.5, 12), materials.roofRidge);
   balcRidge.position.set(0, 23.4, -0.6);
   balcRidge.rotation.z = Math.PI / 2;
   balcRoofGroup.add(balcRidge);
@@ -2203,14 +2191,6 @@ function buildKonkanSlantRoof(parent) {
   rearHip.rotation.x = THREE.MathUtils.degToRad(-26);
   rearHip.castShadow = true;
   parent.add(rearHip);
-
-  // (4) Front Hipped Slope over Bedroom 2 (stepping down to Z = 15.5)
-  const frontHipGeo = new THREE.BoxGeometry(17.5, 0.65, 8.5);
-  const frontHip = new THREE.Mesh(frontHipGeo, materials.roofTile);
-  frontHip.position.set(8.5, 22.8, 12.5);
-  frontHip.rotation.x = THREE.MathUtils.degToRad(24);
-  frontHip.castShadow = true;
-  parent.add(frontHip);
 
   // White Soffit Fascia Trim around entire main roof eaves
   const soffitL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, mainSpanZ), materials.whiteSoffit);
@@ -2350,8 +2330,7 @@ function buildRoomHitboxes() {
     { id: 'bed2', x: 7.3, y: 15.0, z: 4.8, w: 14.0, h: 7.5, d: 9.6 },
     { id: 'toilet-first', x: 11.5, y: 15.0, z: -0.5, w: 5.5, h: 7.5, d: 4.0 },
     { id: 'bed3', x: 7.5, y: 15.0, z: -7.5, w: 14, h: 7.5, d: 13 },
-    { id: 'balcony-front', x: -7.5, y: 13.0, z: 12.1, w: 14.5, h: 5.0, d: 5.0 },
-    { id: 'balcony-bed2', x: 7.3, y: 13.0, z: 12.1, w: 14.0, h: 5.0, d: 5.0 },
+    { id: 'balcony-front', x: 0, y: 13.0, z: 12.1, w: 29.2, h: 5.0, d: 5.0 },
     { id: 'balcony-rear', x: 17.1, y: 13.0, z: -9.05, w: 5.2, h: 5.5, d: 11.2 }
   ];
 
@@ -2796,8 +2775,8 @@ function selectRoom(roomId) {
         moveCameraTo({ x: 32, y: 14.5, z: -5 }, { x: 16.5, y: 11.0, z: -9 });
       } else if (roomId === 'bed3') {
         moveCameraTo({ x: 26, y: 18.0, z: -16 }, { x: 8, y: 12.0, z: -9 });
-      } else if (roomId === 'balcony-bed2') {
-        moveCameraTo({ x: 18, y: 16.0, z: 26 }, { x: 7.3, y: 13.0, z: 12.1 });
+      } else if (roomId === 'balcony-front' || roomId === 'balcony-bed2') {
+        moveCameraTo({ x: 0, y: 16.5, z: 28 }, { x: 0, y: 13.0, z: 12.1 });
       } else if (roomId === 'bed2') {
         moveCameraTo({ x: 18, y: 18.0, z: 18 }, { x: 7.3, y: 13.0, z: 6.0 });
       }
@@ -2830,9 +2809,9 @@ function setupEventListeners() {
 
       const view = btn.dataset.view;
       if (view === 'hero') {
-        moveCameraTo({ x: 0.5, y: 13.5, z: 52 }, { x: 0, y: 11.2, z: 6 });
+        moveCameraTo({ x: -34, y: 20, z: 42 }, { x: 0, y: 10, z: 4 });
       } else if (view === 'front') {
-        moveCameraTo({ x: 0, y: 11.5, z: 42 }, { x: 0, y: 10.5, z: 5 });
+        moveCameraTo({ x: 0, y: 13, z: 58 }, { x: 0, y: 11, z: 6 });
       } else if (view === 'top') {
         moveCameraTo({ x: 0, y: 68, z: 0.1 }, { x: 0, y: 0, z: 0 });
       } else if (view === 'interior') {
@@ -2851,7 +2830,7 @@ function setupEventListeners() {
 
   // Reset Camera
   document.getElementById('btn-reset-cam').addEventListener('click', () => {
-    moveCameraTo({ x: 0.5, y: 13.5, z: 52 }, { x: 0, y: 11.2, z: 6 });
+    moveCameraTo({ x: -34, y: 20, z: 42 }, { x: 0, y: 10, z: 4 });
     setFloorLevel('full');
   });
 
