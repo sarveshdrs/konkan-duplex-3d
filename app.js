@@ -1372,38 +1372,35 @@ function buildHouseModel() {
   buildRailing(firstFloorGroup, -14.6, 10.8, 9.6, -14.6, 10.8, 14.6, 'balcony');   // Left return
   buildRailing(firstFloorGroup, 14.6, 10.8, 9.6, 14.6, 10.8, 14.6, 'balcony');    // Right return
 
-  // Four Symmetrically Spaced Dark Carved Teak Pillars across the Single Large Balcony
-  const colUpperGeo = new THREE.CylinderGeometry(0.5, 0.58, 8.5, 16);
-  const colU1 = new THREE.Mesh(colUpperGeo, materials.darkTeakWood);
-  colU1.position.set(-13.5, 15.0, 14.2);
-  colU1.castShadow = true;
-  firstFloorGroup.add(colU1);
+  // Open Grand Balcony Architecture:
+  // Slender elegant corner support posts that rise directly from the balcony floor (Y = 10.8)
+  // to meet the sloping roof soffits, leaving the middle (27+ ft) completely open to the sky and slant roof!
+  
+  // Left Corner Slender Post (reaching left high slant roof at Y = 22.1)
+  const leftPostH = 11.3;
+  const colLeftGeo = new THREE.CylinderGeometry(0.28, 0.32, leftPostH, 16);
+  const balcColLeft = new THREE.Mesh(colLeftGeo, materials.darkTeakWood);
+  balcColLeft.position.set(-13.8, 10.8 + leftPostH / 2, 14.2);
+  balcColLeft.castShadow = true;
+  firstFloorGroup.add(balcColLeft);
 
-  const colU2 = new THREE.Mesh(colUpperGeo, materials.darkTeakWood);
-  colU2.position.set(-4.5, 15.0, 14.2);
-  colU2.castShadow = true;
-  firstFloorGroup.add(colU2);
+  // Left Post Top Architectural Capital / Mounting Flange
+  const leftCap = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.22, 0.85), materials.darkTeakWood);
+  leftCap.position.set(-13.8, 10.8 + leftPostH - 0.1, 14.2);
+  firstFloorGroup.add(leftCap);
 
-  const colU3 = new THREE.Mesh(colUpperGeo, materials.darkTeakWood);
-  colU3.position.set(4.5, 15.0, 14.2);
-  colU3.castShadow = true;
-  firstFloorGroup.add(colU3);
+  // Right Corner Slender Post (reaching right slant roof at Y = 20.9)
+  const rightPostH = 10.1;
+  const colRightGeo = new THREE.CylinderGeometry(0.28, 0.32, rightPostH, 16);
+  const balcColRight = new THREE.Mesh(colRightGeo, materials.darkTeakWood);
+  balcColRight.position.set(13.8, 10.8 + rightPostH / 2, 14.2);
+  balcColRight.castShadow = true;
+  firstFloorGroup.add(balcColRight);
 
-  const colU4 = new THREE.Mesh(colUpperGeo, materials.darkTeakWood);
-  colU4.position.set(13.5, 15.0, 14.2);
-  colU4.castShadow = true;
-  firstFloorGroup.add(colU4);
-
-  // Grand Balcony Teak Header Beam connecting all 4 pillars
-  const grandBalcBeam = new THREE.Mesh(new THREE.BoxGeometry(29.6, 0.7, 0.8), materials.darkTeakWood);
-  grandBalcBeam.position.set(0, 19.1, 14.2);
-  grandBalcBeam.castShadow = true;
-  firstFloorGroup.add(grandBalcBeam);
-
-  // Left First-Floor Open Terrace Parapet (horizontal railing matching photo)
-  const terraceParapet = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.8, 4.0), materials.wallExterior);
-  terraceParapet.position.set(-14.8, 12.2, 12.0);
-  firstFloorGroup.add(terraceParapet);
+  // Right Post Top Architectural Capital / Mounting Flange
+  const rightCap = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.22, 0.85), materials.darkTeakWood);
+  rightCap.position.set(13.8, 10.8 + rightPostH - 0.1, 14.2);
+  firstFloorGroup.add(rightCap);
 
   // Warm Exterior Sconce Lighting on Front Facade & Balconies
   function addWallSconce(parent, sx, sy, sz) {
@@ -1929,11 +1926,8 @@ function buildFirstFloorWalls(parent) {
   addPhotoMatchingWindow(parent, -11.5, 15.0, 9.8, 2.8, 4.2); // Left sidelight
   addPhotoMatchingWindow(parent, -2.2, 15.0, 9.8, 2.4, 4.2);  // Right sidelight
 
-  // (3) Single Large Unified Dark Teak Paneled Ceiling under Balcony Roof (Spanning full 29.6 ft width)
-  const grandBalcCeilingGeo = new THREE.BoxGeometry(29.6, 0.3, 5.5);
-  const grandBalcCeiling = new THREE.Mesh(grandBalcCeilingGeo, materials.darkTeakWood);
-  grandBalcCeiling.position.set(0, 19.3, 12.1);
-  parent.add(grandBalcCeiling);
+  // (3) Open Grand Balcony Architecture:
+  // No flat dropped ceiling slab here — the balcony is completely open upward directly to the soaring slant roof soffit!
 
   // Interior Partitions:
   // Wall between Bedroom 2 and Bedroom 3 (Z = 0, X: 0 to 15)
@@ -2191,6 +2185,17 @@ function buildModernSkillionRoof(parent) {
   lRidgeCap.castShadow = true;
   leftShedGroup.add(lRidgeCap);
 
+  // 6. Recessed Warm LED Spotlights in Slant Roof Soffit directly over Open Grand Balcony (Z = +12.5)
+  for (let sx of [-4.5, 1.5]) {
+    const sLight = new THREE.PointLight(0xffb86c, 1.1, 14);
+    sLight.position.set(sx, -0.65, 12.5);
+    leftShedGroup.add(sLight);
+
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.05, 12), materials.modernFasciaDark);
+    ring.position.set(sx, -0.34, 12.5);
+    leftShedGroup.add(ring);
+  }
+
   group.add(leftShedGroup);
 
   // ----------------------------------------------------
@@ -2248,6 +2253,17 @@ function buildModernSkillionRoof(parent) {
   rHighCap.position.set(-9.15, 0, 0);
   rightShedGroup.add(rHighCap);
 
+  // 6. Recessed Warm LED Spotlights in Slant Roof Soffit directly over Open Grand Balcony (Z = +12.5)
+  for (let sx of [-2.5, 3.5]) {
+    const sLight = new THREE.PointLight(0xffb86c, 1.1, 14);
+    sLight.position.set(sx, -0.65, 12.5);
+    rightShedGroup.add(sLight);
+
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.05, 12), materials.modernFasciaDark);
+    ring.position.set(sx, -0.34, 12.5);
+    rightShedGroup.add(ring);
+  }
+
   group.add(rightShedGroup);
 
   // ----------------------------------------------------
@@ -2300,29 +2316,34 @@ function buildModernSkillionRoof(parent) {
   }
 
   // Left Front Gable Infill (X: -14.6 to +2.0, Y: 19.5 to slope)
-  const lFrontGable = buildGableInfill(-14.6, 19.5, 2.0, 19.5, 2.0, 27.2, -14.6, 22.0, 13.8, 0.8);
+  // Aligned precisely on top of the Mezzanine front wall line (Z = 9.2 to 10.0),
+  // leaving the entire first-floor grand balcony completely open and directly under the slant roof!
+  const lFrontGable = buildGableInfill(-14.6, 19.5, 2.0, 19.5, 2.0, 27.2, -14.6, 22.0, 9.2, 0.8);
   group.add(lFrontGable);
 
-  // Left Rear Gable Infill
+  // Left Rear Gable Infill (Z = -14.6)
   const lRearGable = buildGableInfill(-14.6, 19.5, 2.0, 19.5, 2.0, 27.2, -14.6, 22.0, -14.6, 0.8);
   group.add(lRearGable);
 
   // Right Front Gable Infill (X: +2.0 to +14.6, Y: 19.5 to slope)
-  const rFrontGable = buildGableInfill(2.0, 19.5, 14.6, 19.5, 14.6, 20.8, 2.0, 24.0, 13.8, 0.8);
+  // Aligned precisely on top of the Bedroom 2 front wall line (Z = 9.2 to 10.0),
+  // leaving Bedroom 2's European French doors opening out to the soaring open balcony under the slant roof!
+  const rFrontGable = buildGableInfill(2.0, 19.5, 14.6, 19.5, 14.6, 20.8, 2.0, 24.0, 9.2, 0.8);
   group.add(rFrontGable);
 
-  // Right Rear Gable Infill
+  // Right Rear Gable Infill (Z = -14.6)
   const rRearGable = buildGableInfill(2.0, 19.5, 14.6, 19.5, 14.6, 20.8, 2.0, 24.0, -14.6, 0.8);
   group.add(rRearGable);
 
-  // Left & Right Upper Wall Extents
-  const lTopWall = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.5, 28.4), materials.wallExterior);
-  lTopWall.position.set(-14.6, 20.75, 0);
+  // Left & Right Upper Wall Extents (enclosing room envelope from Z = -14.6 to +9.6, length = 24.2 ft, center Z = -2.5)
+  // Balcony sides (Z = 9.6 to 14.6) remain completely open above the balustrade under the soaring slant roof!
+  const lTopWall = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.5, 24.2), materials.wallExterior);
+  lTopWall.position.set(-14.6, 20.75, -2.5);
   lTopWall.castShadow = true;
   group.add(lTopWall);
 
-  const rTopWall = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.4, 28.4), materials.wallExterior);
-  rTopWall.position.set(14.6, 20.2, 0);
+  const rTopWall = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.4, 24.2), materials.wallExterior);
+  rTopWall.position.set(14.6, 20.2, -2.5);
   rTopWall.castShadow = true;
   group.add(rTopWall);
 

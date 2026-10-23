@@ -15,22 +15,32 @@
 - **Bathrooms & Doglegged Staircase:** Attached and common ground-floor bathrooms, and a 20-step doglegged teak staircase.
 
 ### 2. First Floor (F.L. — ~780 ft²)
-- **Upper Mezzanine Gallery & Passage:** Bridge walkway overlooking the grand living room void below.
-- **Bedroom 2 (Master Suite with Private Balcony):**
-  - **Private Front Balcony (14' 0" × 5' 0"):** Symmetrically paired with the left balcony, separated by a solid privacy dividing wall, and supported by two carved teak pillars.
-  - **European Full-Glass French Door (*Porte-Fenêtre*):** 6' 6" × 6' 8" double-leaf door with floor-to-ceiling clear architectural glass, ultra-slim stiles, astragal muntin bars, and polished brass cremone bolt (*espagnolette*) hardware with active leaf swung open.
-  - Master bed centered facing directly out through the French doors to the private balcony.
+- **Open Grand Front Balcony (29' 2" × 5' 0" Unified Terrace):**
+  - Continuous, single expansive front balcony seamlessly connecting Bedroom 2 and the Mezzanine Gallery.
+  - **Open Loft Volume Directly Under Slant Roof:** Designed completely open upward directly to the soaring underside of the modern slant roof, free of low dropped ceiling slabs or heavy horizontal transom beams.
+  - **Slender Architectural Corner Posts:** Sleek support posts rising from the balcony floor directly to meet the sloping roof soffits, leaving a 27+ ft wide open panoramic vista.
+  - **Recessed Warm Roof Downlights:** Integrated LED spotlights embedded directly in the roof soffits casting warm illumination down onto the balcony.
+  - Furnished with teak outdoor dining/bistro armchairs and flowering bougainvillea terracotta planters.
+- **Bedroom 2 (Master Suite with French Balcony Doors):**
+  - **European Full-Glass French Door (*Porte-Fenêtre*):** 6' 6" × 6' 8" double-leaf door with floor-to-ceiling clear architectural glass, ultra-slim stiles, astragal muntin bars, and polished brass cremone bolt (*espagnolette*) hardware opening onto the grand balcony.
+  - Flanked by natural ashlar stone cladding accent panels.
 - **Bedroom 3 (Upper Bedroom Suite with Private Side Balcony):**
   - **Private Side Balcony (5' 0" × 11' 2"):** Positioned directly above the ground-floor kitchen exit door and utility platform, providing weather sheltering below.
   - **European Full-Glass French Door (*Porte-Fenêtre*):** 5' 6" × 6' 8" double-leaf door with full-height clear glass, astragal glazing bars, and dual-sided brass cremone bolts.
   - **Windowless Wall Architecture:** Faithful to CAD Drawing A100, Bedroom 3 has no windows on its side or rear walls, providing quiet thermal insulation and illuminating the space purely through the grand French balcony door.
-  - Furnished with outdoor teak bistro seating, flowering bougainvillea planters, and bed headboard against the solid rear wall.
+- **Upper Mezzanine Gallery & Passage:** Bridge walkway overlooking the grand living room void below.
 
-### 3. Roof & Climate-Responsive Architecture
-- **38° Steep Sloping Pitch:** Dual-hipped authentic Mangalore terracotta clay tiles engineered for heavy coastal monsoons (>3,500 mm rainfall).
-- **Deep 3.5 ft Overhanging Eaves (Chajjas):** Protects exterior plastered walls and open wooden balconies from aggressive driving rains.
-- **Ornamental Dormer Vent (*Koodu / Gablette*):** Triangular ventilation louver at the upper balcony ridge apex.
-- **Brass Rain Chains (*Kusari*):** Suspended from eave corners down to drainage basins for graceful rainwater management.
+### 3. Roof Architecture (Interactive Dual-Style Selector)
+- **Modern Split Skillion (Shed) Roof (Default — Photo Design):**
+  - **Asymmetrical Split-Level Mono-Pitch Planes:** High left shed roof (17.5° pitch rising to 27.6 ft) over the living void and mezzanine, paired with a lower offset right shed roof (13.5° pitch) over Bedrooms 2 & 3.
+  - **Continuous Vertical Clerestory:** 33 ft long step featuring architectural ribbon glazing and dark aluminum mullions providing passive daylight into the core.
+  - **Crisp Modern Fascia & Soffits:** Wide white fascia boards with dark architectural reveal grooves and recessed LED soffit downlights over the open grand balcony.
+  - **Cantilevered Box Porch Canopy:** Deep floating entrance slab with stacked stone-clad pillar and white vertical privacy louvers.
+- **Traditional Konkan Slanted Roof (Authentic Coastal Option):**
+  - **38° Steep Sloping Pitch:** Dual-hipped authentic Mangalore terracotta clay tiles engineered for heavy coastal monsoons (>3,500 mm rainfall).
+  - **Deep 3.5 ft Overhanging Eaves (Chajjas):** Protects exterior plastered walls and open wooden balconies from aggressive driving rains.
+  - **Ornamental Dormer Vent (*Koodu / Gablette*):** Triangular ventilation louver at the upper balcony ridge apex.
+  - **Brass Rain Chains (*Kusari*):** Suspended from eave corners down to drainage basins for graceful rainwater management.
 
 ---
 
