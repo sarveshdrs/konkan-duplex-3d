@@ -20,6 +20,7 @@ let scene, camera, renderer, controls;
 let groundFloorGroup, firstFloorGroup, roofGroup;
 let modernRoofGroup, konkanRoofGroup, abhalmayaRoofGroup, porchKonkanRoof;
 let frontBalustradeTeakGroup, frontBalustradeGlassGroup, modernBalcPostsGroup, abhalmayaPlaqueGroup;
+let balconyBistroFurnitureGroup;
 let environmentGroup, dimensionGroup;
 let rainParticles, rainCascades, rainSplashes;
 let dirLight, ambientLight, interiorLights = [];
@@ -420,6 +421,128 @@ function createScallopedLaceTexture() {
   return texture;
 }
 
+// High-Fidelity Mangalore Weathered Terracotta Clay Tile Texture (Exact match to Bungalow "आभाळमाया" Photo)
+function createAbhalmayaTileTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 1024;
+  const ctx = canvas.getContext('2d');
+
+  // Base weathered clay color (deep chocolate terracotta: #5c241c to #6d2c22)
+  ctx.fillStyle = '#61261d';
+  ctx.fillRect(0, 0, 1024, 1024);
+
+  const numRows = 16;
+  const numCols = 32;
+  const rowH = 1024 / numRows; // 64px
+  const colW = 1024 / numCols; // 32px
+
+  for (let r = 0; r < numRows; r++) {
+    const y0 = r * rowH;
+    const xOffset = (r % 2 === 0) ? 0 : colW / 2;
+
+    for (let c = -1; c < numCols + 1; c++) {
+      const x0 = c * colW + xOffset;
+
+      // Realistic clay tile color tone variations (warm terracotta, deep umber, burnt sienna)
+      const toneRand = Math.random();
+      let tileColor = '#6d2b21';
+      if (toneRand < 0.25) tileColor = '#5c2219';
+      else if (toneRand < 0.5) tileColor = '#753024';
+      else if (toneRand < 0.75) tileColor = '#66271e';
+      else tileColor = '#7a3427';
+
+      ctx.fillStyle = tileColor;
+      ctx.fillRect(x0 + 1, y0 + 1, colW - 2, rowH - 2);
+
+      // Fluted curved cylinder shading (trough shadow -> crest highlight -> trough shadow)
+      const grad = ctx.createLinearGradient(x0, y0, x0 + colW, y0);
+      grad.addColorStop(0.0, 'rgba(25, 8, 4, 0.55)');
+      grad.addColorStop(0.2, 'rgba(40, 14, 8, 0.25)');
+      grad.addColorStop(0.48, 'rgba(255, 175, 140, 0.22)');
+      grad.addColorStop(0.52, 'rgba(255, 185, 150, 0.25)');
+      grad.addColorStop(0.8, 'rgba(30, 10, 5, 0.3)');
+      grad.addColorStop(1.0, 'rgba(20, 6, 3, 0.6)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x0 + 1, y0 + 1, colW - 2, rowH - 2);
+
+      // Vertical tile interlock seam
+      ctx.fillStyle = 'rgba(15, 4, 2, 0.7)';
+      ctx.fillRect(x0, y0, 1.5, rowH);
+
+      // Horizontal overlapping course lip shadow
+      const lipGrad = ctx.createLinearGradient(x0, y0 + rowH - 8, x0, y0 + rowH);
+      lipGrad.addColorStop(0.0, 'rgba(0, 0, 0, 0.0)');
+      lipGrad.addColorStop(0.6, 'rgba(15, 4, 2, 0.65)');
+      lipGrad.addColorStop(1.0, 'rgba(10, 2, 1, 0.85)');
+      ctx.fillStyle = lipGrad;
+      ctx.fillRect(x0, y0 + rowH - 8, colW, 8);
+
+      // Bottom highlighted lip rim
+      ctx.fillStyle = 'rgba(255, 190, 160, 0.35)';
+      ctx.fillRect(x0 + 1, y0 + 1, colW - 2, 2.5);
+    }
+  }
+
+  // Organic micro-speckle kiln noise
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+  for (let i = 0; i < 6000; i++) {
+    const rx = Math.random() * 1024;
+    const ry = Math.random() * 1024;
+    ctx.fillRect(rx, ry, 1.5, 1.5);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(4, 4);
+  return texture;
+}
+
+// Procedural Bump Map for Tile Relief Depth
+function createAbhalmayaTileBumpTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, 512, 512);
+
+  const numRows = 16;
+  const numCols = 32;
+  const rowH = 512 / numRows;
+  const colW = 512 / numCols;
+
+  for (let r = 0; r < numRows; r++) {
+    const y0 = r * rowH;
+    const xOffset = (r % 2 === 0) ? 0 : colW / 2;
+
+    for (let c = -1; c < numCols + 1; c++) {
+      const x0 = c * colW + xOffset;
+
+      const grad = ctx.createLinearGradient(x0, y0, x0 + colW, y0);
+      grad.addColorStop(0.0, '#303030');
+      grad.addColorStop(0.5, '#e0e0e0');
+      grad.addColorStop(1.0, '#303030');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x0, y0, colW, rowH - 4);
+
+      // Overlap edge
+      ctx.fillStyle = '#050505';
+      ctx.fillRect(x0, y0 + rowH - 4, colW, 4);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x0, y0, colW, 2);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(4, 4);
+  return texture;
+}
+
 // Materials Library
 let materials = {};
 
@@ -440,11 +563,12 @@ function initMaterials() {
       color: 0xd44d26 // Deep warm terracotta clay tone
     }),
     abhalmayaRoofTile: new THREE.MeshStandardMaterial({
-      map: tileTex,
-      roughness: 0.62,
-      metalness: 0.05,
-      bumpScale: 0.16,
-      color: 0xa84a28 // Rich warm chocolate-terracotta clay matching attached photo!
+      map: createAbhalmayaTileTexture(),
+      bumpMap: createAbhalmayaTileBumpTexture(),
+      bumpScale: 0.18,
+      roughness: 0.72,
+      metalness: 0.04,
+      side: THREE.DoubleSide
     }),
     stainlessSteel: new THREE.MeshStandardMaterial({
       color: 0xdedfe3,
@@ -2018,7 +2142,7 @@ function buildFirstFloorWalls(parent) {
   addStoneCladdingPanel(parent, 12.6, 14.8, 9.95, 3.4, 5.8);
 
   // Grand Balcony Outdoor Furniture (Teak Bistro Table, Armchairs & Flowering Bougainvillea Planter)
-  buildBalconyOutdoorFurniture(parent, 7.3, 10.8, 12.2);
+  balconyBistroFurnitureGroup = buildBalconyOutdoorFurniture(parent, 7.3, 10.8, 12.2);
 
   // Front Wall at Balcony (X: -15 to 0, Z = 9.6)
   // Completely enclosed with glazed double balcony doors and sidelights
@@ -2812,236 +2936,240 @@ function buildGlassBalustrade(parent) {
 function buildAbhalmayaRoof(parent) {
   const group = new THREE.Group();
 
-  // ----------------------------------------------------
-  // (A) LEFT WING: FORWARD-PROJECTING HIPPED ROOF CANOPY
-  // Covers Living Void, Mezzanine, and Projects over First-Floor Left Balcony
-  // X: -17.5 to +1.8 (width 19.3 ft), Z: -17.5 to +17.5 (depth 35.0 ft)
-  // Eave height: Y = 20.2, Ridge height: Y = 25.5 at X = -7.8
-  // ----------------------------------------------------
-  const leftWingGroup = new THREE.Group();
+  // =========================================================================
+  // 1. MATHEMATICALLY EXACT COMPOUND HIPPED ROOF SHELL (BUFFERGEOMETRY)
+  // Replicating the unified L-shaped terracotta roof of Bungalow "आभाळमाया"
+  // =========================================================================
+  const Ye = 20.3; // Eave height
+  const Yr = 26.8; // Ridge height (rise = 6.5 ft, bold authentic ~29° Mangalore pitch matching photo)
 
-  // 1. Left Slope (X: -7.8 down to -17.5, width along slope = 11.0 ft, pitch 28.5°)
-  const lSlopeGeo = new THREE.BoxGeometry(11.0, 0.55, 35.2);
-  const lSlope = new THREE.Mesh(lSlopeGeo, materials.abhalmayaRoofTile);
-  lSlope.position.set(-12.65, 22.85, 0);
-  lSlope.rotation.z = THREE.MathUtils.degToRad(28.5);
-  lSlope.castShadow = true;
-  lSlope.receiveShadow = true;
-  leftWingGroup.add(lSlope);
+  // Exact 3D Plan Coordinates of 9 Key Vertices:
+  // E1: Rear-Left Eave (-17.2, Ye, -17.2)
+  // E2: Rear-Right Eave (+17.2, Ye, -17.2)
+  // E3: Front-Right Eave of Right Wing (+17.2, Ye, +11.8)
+  // E4: Inside Valley Eave Foot (+1.5, Ye, +11.8)
+  // E5: Front-Right Eave of Left Projection (+1.5, Ye, +17.2)
+  // E6: Front-Left Eave of Left Projection (-17.2, Ye, +17.2)
+  // Alf: Left Wing Front Ridge Apex (-7.85, Yr, +6.8)
+  // J:   Ridge Junction & Valley Head (-7.85, Yr, 0.0)
+  // Ar:  Right Wing Ridge Apex (+7.2, Yr, 0.0)
 
-  // Under-soffit for left slope
-  const lSoffit = new THREE.Mesh(new THREE.BoxGeometry(10.8, 0.15, 35.0), materials.whiteSoffit);
-  lSoffit.position.set(-12.65, 22.55, 0);
-  lSoffit.rotation.z = THREE.MathUtils.degToRad(28.5);
-  leftWingGroup.add(lSoffit);
+  const V = {
+    E1:  new THREE.Vector3(-17.2, Ye, -17.2),
+    E2:  new THREE.Vector3( 17.2, Ye, -17.2),
+    E3:  new THREE.Vector3( 17.2, Ye,  11.8),
+    E4:  new THREE.Vector3(  1.5, Ye,  11.8),
+    E5:  new THREE.Vector3(  1.5, Ye,  17.2),
+    E6:  new THREE.Vector3(-17.2, Ye,  17.2),
+    Alf: new THREE.Vector3(-7.85, Yr,  6.8),
+    J:   new THREE.Vector3(-7.85, Yr,  0.0),
+    Ar:  new THREE.Vector3( 7.2,  Yr,  0.0)
+  };
 
-  // 2. Front Hip Slope (Projects forward over Left Balcony!)
-  // Slopes down from Z = +8.5 to front eave at Z = +17.5 (length along slope = 10.3 ft, pitch 28.5°)
-  const fSlopeGeo = new THREE.BoxGeometry(19.5, 0.55, 10.3);
-  const fSlope = new THREE.Mesh(fSlopeGeo, materials.abhalmayaRoofTile);
-  fSlope.position.set(-7.85, 22.85, 13.0);
-  fSlope.rotation.x = THREE.MathUtils.degToRad(28.5);
-  fSlope.castShadow = true;
-  fSlope.receiveShadow = true;
-  leftWingGroup.add(fSlope);
+  // 6 Face groups with tailored UV mapping per slope:
+  const faceDefinitions = [
+    { type: 1, tris: [[V.E6, V.E5, V.Alf]] },
+    { type: 2, tris: [[V.E1, V.E6, V.Alf], [V.E1, V.Alf, V.J]] },
+    { type: 3, tris: [[V.E4, V.J, V.E5], [V.J, V.Alf, V.E5]] },
+    { type: 4, tris: [[V.E4, V.E3, V.Ar], [V.E4, V.Ar, V.J]] },
+    { type: 5, tris: [[V.E3, V.E2, V.Ar]] },
+    { type: 6, tris: [[V.E2, V.E1, V.J], [V.E2, V.J, V.Ar]] }
+  ];
 
-  // Under-soffit for front hip
-  const fSoffit = new THREE.Mesh(new THREE.BoxGeometry(19.3, 0.15, 10.1), materials.whiteSoffit);
-  fSoffit.position.set(-7.85, 22.55, 13.0);
-  fSoffit.rotation.x = THREE.MathUtils.degToRad(28.5);
-  leftWingGroup.add(fSoffit);
+  const posArr = [];
+  const uvArr = [];
 
-  // 3. Rear Hip Slope of Left Wing (slopes down to Z = -17.5)
-  const rSlopeGeo = new THREE.BoxGeometry(19.5, 0.55, 10.3);
-  const rSlope = new THREE.Mesh(rSlopeGeo, materials.abhalmayaRoofTile);
-  rSlope.position.set(-7.85, 22.85, -13.0);
-  rSlope.rotation.x = THREE.MathUtils.degToRad(-28.5);
-  rSlope.castShadow = true;
-  rSlope.receiveShadow = true;
-  leftWingGroup.add(rSlope);
-
-  // 4. Right Forward Slope of Left Wing (Between Z = 11.5 and 17.5, X: -7.8 to +1.8)
-  // Forms the right hip slope of the forward-projecting canopy
-  const rFwdSlopeGeo = new THREE.BoxGeometry(11.0, 0.55, 6.2);
-  const rFwdSlope = new THREE.Mesh(rFwdSlopeGeo, materials.abhalmayaRoofTile);
-  rFwdSlope.position.set(-3.0, 22.85, 14.4);
-  rFwdSlope.rotation.z = THREE.MathUtils.degToRad(-28.5);
-  rFwdSlope.castShadow = true;
-  rFwdSlope.receiveShadow = true;
-  leftWingGroup.add(rFwdSlope);
-
-  // Flat horizontal white ceiling underneath the covered balcony projection
-  const balcCeilGeo = new THREE.BoxGeometry(16.5, 0.25, 7.8);
-  const balcCeil = new THREE.Mesh(balcCeilGeo, materials.whiteSoffit);
-  balcCeil.position.set(-7.85, 20.0, 13.5);
-  leftWingGroup.add(balcCeil);
-
-  // Recessed warm LED spotlight under covered balcony canopy
-  const balcSpot = new THREE.PointLight(0xffb86c, 1.4, 15);
-  balcSpot.position.set(-7.85, 19.4, 13.5);
-  leftWingGroup.add(balcSpot);
-
-  const balcRing = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.05, 12), materials.darkTeakWood);
-  balcRing.position.set(-7.85, 19.9, 13.5);
-  leftWingGroup.add(balcRing);
-
-  // 5. Square Architectural Support Column at Outer Front-Left Corner (As shown in photo!)
-  const colGeo = new THREE.BoxGeometry(0.9, 9.2, 0.9);
-  const colMesh = new THREE.Mesh(colGeo, materials.wallExterior);
-  colMesh.position.set(-13.8, 15.4, 14.2);
-  colMesh.castShadow = true;
-  leftWingGroup.add(colMesh);
-
-  // Column base plinth & capital moldings
-  const colBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 1.2), materials.whiteTrim);
-  colBase.position.set(-13.8, 11.0, 14.2);
-  leftWingGroup.add(colBase);
-
-  const colCap = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 1.2), materials.whiteTrim);
-  colCap.position.set(-13.8, 19.8, 14.2);
-  leftWingGroup.add(colCap);
-
-  // Architrave header beam connecting column to wall
-  const archBeam = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 4.8), materials.wallExterior);
-  archBeam.position.set(-13.8, 19.65, 11.8);
-  leftWingGroup.add(archBeam);
-
-  group.add(leftWingGroup);
-
-  // ----------------------------------------------------
-  // (B) RIGHT WING: SETBACK HIPPED ROOF OVER BEDROOM 2 & 3
-  // Sits back behind the first-floor balcony, leaving Bedroom 2's front terrace OPEN TO THE SKY!
-  // X: 0.0 to 17.5, Z: -17.5 to +11.8 (Front eave stops at Z = +11.8!)
-  // ----------------------------------------------------
-  const rightWingGroup = new THREE.Group();
-
-  // 1. Front Slope of Right Wing (slopes down to eave at Z = +11.8, Y = 20.2)
-  const rFrontSlopeGeo = new THREE.BoxGeometry(17.8, 0.55, 15.8);
-  const rFrontSlope = new THREE.Mesh(rFrontSlopeGeo, materials.abhalmayaRoofTile);
-  rFrontSlope.position.set(8.75, 22.8, 4.4);
-  rFrontSlope.rotation.x = THREE.MathUtils.degToRad(19.5);
-  rFrontSlope.castShadow = true;
-  rFrontSlope.receiveShadow = true;
-  rightWingGroup.add(rFrontSlope);
-
-  // Under-soffit for right front slope
-  const rFrontSoffit = new THREE.Mesh(new THREE.BoxGeometry(17.6, 0.15, 15.6), materials.whiteSoffit);
-  rFrontSoffit.position.set(8.75, 22.5, 4.4);
-  rFrontSoffit.rotation.x = THREE.MathUtils.degToRad(19.5);
-  rightWingGroup.add(rFrontSoffit);
-
-  // 2. Right Hip Slope (slopes down to right eave at X = +17.5, Y = 20.2)
-  const rHipGeo = new THREE.BoxGeometry(10.5, 0.55, 29.5);
-  const rHip = new THREE.Mesh(rHipGeo, materials.abhalmayaRoofTile);
-  rHip.position.set(13.0, 22.8, -2.85);
-  rHip.rotation.z = THREE.MathUtils.degToRad(-28.5);
-  rHip.castShadow = true;
-  rHip.receiveShadow = true;
-  rightWingGroup.add(rHip);
-
-  // Under-soffit for right hip
-  const rHipSoffit = new THREE.Mesh(new THREE.BoxGeometry(10.3, 0.15, 29.3), materials.whiteSoffit);
-  rHipSoffit.position.set(13.0, 22.5, -2.85);
-  rHipSoffit.rotation.z = THREE.MathUtils.degToRad(-28.5);
-  rightWingGroup.add(rHipSoffit);
-
-  // 3. Rear Slope of Right Wing (slopes down to Z = -17.5, Y = 20.2)
-  const rRearSlopeGeo = new THREE.BoxGeometry(17.8, 0.55, 15.8);
-  const rRearSlope = new THREE.Mesh(rRearSlopeGeo, materials.abhalmayaRoofTile);
-  rRearSlope.position.set(8.75, 22.8, -10.1);
-  rRearSlope.rotation.x = THREE.MathUtils.degToRad(-19.5);
-  rRearSlope.castShadow = true;
-  rRearSlope.receiveShadow = true;
-  rightWingGroup.add(rRearSlope);
-
-  group.add(rightWingGroup);
-
-  // ----------------------------------------------------
-  // (C) TERRACOTTA RIDGE CAPS & HIP ROOF PEAKS
-  // ----------------------------------------------------
-  // 1. Left Ridge (X = -7.85, Y = 25.5, Z: -9.0 to +8.5)
-  const lRidge = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 17.5, 12), materials.roofRidge);
-  lRidge.position.set(-7.85, 25.55, -0.25);
-  lRidge.rotation.x = Math.PI / 2;
-  group.add(lRidge);
-
-  // 2. Right Ridge (Z = -2.85, Y = 25.5, X: -7.85 to +8.5)
-  const rRidge = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 16.35, 12), materials.roofRidge);
-  rRidge.position.set(0.325, 25.55, -2.85);
-  rRidge.rotation.z = Math.PI / 2;
-  group.add(rRidge);
-
-  // 3. Hip Caps (diagonal ridges)
-  function addHipCap(x1, y1, z1, x2, y2, z2) {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const dz = z2 - z1;
-    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, len, 10), materials.roofRidge);
-    cap.position.set((x1 + x2) / 2, (y1 + y2) / 2, (z1 + z2) / 2);
-    cap.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(dx, dy, dz).normalize());
-    group.add(cap);
+  for (let face of faceDefinitions) {
+    for (let tri of face.tris) {
+      for (let pt of tri) {
+        posArr.push(pt.x, pt.y, pt.z);
+        if (face.type === 1 || face.type === 4) {
+          // Front slopes: horizontal along X, slope distance along Z/Y
+          uvArr.push((pt.x + 20) / 2.6, (pt.z - 11.0) / 2.6);
+        } else if (face.type === 2 || face.type === 3 || face.type === 5) {
+          // Side slopes: horizontal along Z, vertical along Y
+          uvArr.push((pt.z + 20) / 2.6, (pt.y - 20.0) / 2.6);
+        } else {
+          // Rear slope
+          uvArr.push((pt.x + 20) / 2.6, (pt.z + 20) / 2.6);
+        }
+      }
+    }
   }
-  // Left Front-Left Hip
-  addHipCap(-7.85, 25.5, 8.5, -17.5, 20.2, 17.5);
-  // Left Front-Right Hip
-  addHipCap(-7.85, 25.5, 8.5, 1.8, 20.2, 17.5);
-  // Left Rear-Left Hip
-  addHipCap(-7.85, 25.5, -9.0, -17.5, 20.2, -17.5);
-  // Right Front-Right Hip
-  addHipCap(8.5, 25.5, -2.85, 17.5, 20.2, 11.8);
-  // Right Rear-Right Hip
-  addHipCap(8.5, 25.5, -2.85, 17.5, 20.2, -17.5);
 
-  // ----------------------------------------------------
-  // (D) CONTINUOUS WHITE SCALLOPED LACE VALANCE EAVES
+  const roofGeo = new THREE.BufferGeometry();
+  roofGeo.setAttribute('position', new THREE.Float32BufferAttribute(posArr, 3));
+  roofGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvArr, 2));
+  roofGeo.computeVertexNormals();
+
+  const roofMesh = new THREE.Mesh(roofGeo, materials.abhalmayaRoofTile);
+  roofMesh.castShadow = true;
+  roofMesh.receiveShadow = true;
+  group.add(roofMesh);
+
+  // Matching Under-Soffit Sloping Geometry (offset slightly inward)
+  const soffitPosArr = [];
+  for (let face of faceDefinitions) {
+    for (let tri of face.tris) {
+      for (let pt of [tri[0], tri[2], tri[1]]) {
+        soffitPosArr.push(pt.x, pt.y - 0.22, pt.z);
+      }
+    }
+  }
+  const soffitGeo = new THREE.BufferGeometry();
+  soffitGeo.setAttribute('position', new THREE.Float32BufferAttribute(soffitPosArr, 3));
+  soffitGeo.computeVertexNormals();
+  const soffitMesh = new THREE.Mesh(soffitGeo, materials.whiteSoffit);
+  group.add(soffitMesh);
+
+  // =========================================================================
+  // 2. FLAT UNDER-SOFFIT CEILING UNDER COVERED LEFT BALCONY CANOPY
+  // =========================================================================
+  const balcCeilGeo = new THREE.BoxGeometry(17.7, 0.25, 6.9);
+  const balcCeil = new THREE.Mesh(balcCeilGeo, materials.whiteSoffit);
+  balcCeil.position.set(-7.65, 20.0, 13.05);
+  group.add(balcCeil);
+
+  // Recessed warm LED spotlight in balcony ceiling
+  const balcSpot = new THREE.PointLight(0xffb86c, 1.4, 15);
+  balcSpot.position.set(-7.65, 19.4, 13.05);
+  group.add(balcSpot);
+
+  const spotTrim = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.05, 16), materials.darkTeakWood);
+  spotTrim.position.set(-7.65, 19.9, 13.05);
+  group.add(spotTrim);
+
+  // =========================================================================
+  // 3. ARCHITECTURAL SUPPORT COLUMN AT FRONT-LEFT OUTER BALCONY CORNER
+  // (Identical to square column in bungalow photo)
+  // =========================================================================
+  const colX = -13.8;
+  const colZ = 14.2;
+
+  // Plinth base
+  const colBase = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.5, 1.35), materials.whiteTrim);
+  colBase.position.set(colX, 11.05, colZ);
+  colBase.castShadow = true;
+  group.add(colBase);
+
+  // Square column shaft
+  const colShaft = new THREE.Mesh(new THREE.BoxGeometry(1.05, 8.4, 1.05), materials.wallExterior);
+  colShaft.position.set(colX, 15.4, colZ);
+  colShaft.castShadow = true;
+  group.add(colShaft);
+
+  // Capital molding
+  const colCap = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.5, 1.35), materials.whiteTrim);
+  colCap.position.set(colX, 19.75, colZ);
+  colCap.castShadow = true;
+  group.add(colCap);
+
+  // Architrave header beam from column to wall along Z
+  const beamLeft = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.85, 4.8), materials.wallExterior);
+  beamLeft.position.set(colX, 19.65, 11.8);
+  beamLeft.castShadow = true;
+  group.add(beamLeft);
+
+  // Architrave header beam from column to valley step along X
+  const beamFront = new THREE.Mesh(new THREE.BoxGeometry(15.3, 0.85, 0.85), materials.wallExterior);
+  beamFront.position.set(-6.15, 19.65, colZ);
+  beamFront.castShadow = true;
+  group.add(beamFront);
+
+  // =========================================================================
+  // 4. TERRACOTTA RIDGE CAPS & HIP CAPS ALONG ALL JUNCTIONS
+  // =========================================================================
+  function addRidgeCap(p1, p2, radius = 0.36, isValley = false) {
+    const dir = new THREE.Vector3().subVectors(p2, p1);
+    const len = dir.length();
+    const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+
+    if (isValley) {
+      // Recessed dark bronze valley flashing trough
+      const valleyGeo = new THREE.BoxGeometry(0.42, 0.08, len);
+      const valleyMesh = new THREE.Mesh(valleyGeo, materials.darkTeakWood);
+      valleyMesh.position.copy(mid);
+      valleyMesh.position.y += 0.04;
+      valleyMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir.clone().normalize());
+      group.add(valleyMesh);
+    } else {
+      // Rounded semi-cylindrical ridge tile cap
+      const capGeo = new THREE.CylinderGeometry(radius, radius, len, 12);
+      const capMesh = new THREE.Mesh(capGeo, materials.roofRidge);
+      capMesh.position.copy(mid);
+      capMesh.position.y += 0.12;
+      capMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+      capMesh.castShadow = true;
+      group.add(capMesh);
+    }
+  }
+
+  // 1. Left Ridge
+  addRidgeCap(V.Alf, V.J);
+  // 2. Right Ridge
+  addRidgeCap(V.J, V.Ar);
+  // 3. Left Front-Left Hip
+  addRidgeCap(V.Alf, V.E6);
+  // 4. Left Front-Right Hip
+  addRidgeCap(V.Alf, V.E5);
+  // 5. Left Rear-Left Hip
+  addRidgeCap(V.J, V.E1);
+  // 6. Right Front-Right Hip
+  addRidgeCap(V.Ar, V.E3);
+  // 7. Right Rear-Right Hip
+  addRidgeCap(V.Ar, V.E2);
+  // 8. Internal Roof Valley
+  addRidgeCap(V.E4, V.J, 0.3, true);
+
+  // =========================================================================
+  // 5. CONTINUOUS WHITE SCALLOPED LACE VALANCE EAVES TRIM
   // (Signature architectural detail from the attached photograph!)
-  // ----------------------------------------------------
+  // =========================================================================
   const laceTex = createScallopedLaceTexture();
   const laceMat = new THREE.MeshStandardMaterial({
     map: laceTex,
     transparent: true,
     alphaTest: 0.45,
-    roughness: 0.6,
+    roughness: 0.55,
     metalness: 0.02,
     side: THREE.DoubleSide
   });
 
-  function addScallopedEave(x1, y, z1, x2, y2, z2) {
-    const dx = x2 - x1;
-    const dz = z2 - z1;
-    const len = Math.sqrt(dx * dx + dz * dz);
-    const ang = Math.atan2(dz, dx);
-    const eaveGeo = new THREE.PlaneGeometry(len, 0.75);
-    const mesh = new THREE.Mesh(eaveGeo, laceMat);
-    mesh.position.set((x1 + x2) / 2, y - 0.28, (z1 + z2) / 2);
-    mesh.rotation.y = -ang;
-    mesh.castShadow = true;
-    group.add(mesh);
+  function addEaveSegment(p1, p2) {
+    const dir = new THREE.Vector3().subVectors(p2, p1);
+    const len = dir.length();
+    const ang = Math.atan2(dir.z, dir.x);
+    const midX = (p1.x + p2.x) / 2;
+    const midZ = (p1.z + p2.z) / 2;
+    const midY = (p1.y + p2.y) / 2;
 
-    // Solid fascia board backing
-    const fascia = new THREE.Mesh(new THREE.BoxGeometry(len, 0.35, 0.1), materials.whiteTrim);
-    fascia.position.set((x1 + x2) / 2, y, (z1 + z2) / 2);
+    // Solid white fascia board backing
+    const fascia = new THREE.Mesh(new THREE.BoxGeometry(len, 0.42, 0.12), materials.whiteTrim);
+    fascia.position.set(midX, midY + 0.05, midZ);
     fascia.rotation.y = -ang;
+    fascia.castShadow = true;
     group.add(fascia);
+
+    // Hanging scalloped fretwork lace
+    const laceGeo = new THREE.PlaneGeometry(len, 0.78);
+    const laceMesh = new THREE.Mesh(laceGeo, laceMat);
+    laceMesh.position.set(midX, midY - 0.28, midZ);
+    laceMesh.rotation.y = -ang;
+    laceMesh.castShadow = true;
+    group.add(laceMesh);
   }
 
-  // 1. Front projecting left eave (X: -17.5 to +1.8, Z = 17.5)
-  addScallopedEave(-17.5, 20.2, 17.5, 1.8, 20.2, 17.5);
-  // 2. Left side eave (Z: -17.5 to +17.5, X = -17.5)
-  addScallopedEave(-17.5, 20.2, 17.5, -17.5, 20.2, -17.5);
-  // 3. Valley return eave (Z: 17.5 to 11.8, X = 1.8)
-  addScallopedEave(1.8, 20.2, 17.5, 1.8, 20.2, 11.8);
-  // 4. Front setback right eave (X: 1.8 to 17.5, Z = 11.8)
-  addScallopedEave(1.8, 20.2, 11.8, 17.5, 20.2, 11.8);
-  // 5. Right side eave (Z: 11.8 to -17.5, X = 17.5)
-  addScallopedEave(17.5, 20.2, 11.8, 17.5, 20.2, -17.5);
-  // 6. Rear eave (X: 17.5 to -17.5, Z = -17.5)
-  addScallopedEave(17.5, 20.2, -17.5, -17.5, 20.2, -17.5);
+  // Follow the exact 6 perimeter eave segments in sequence:
+  addEaveSegment(V.E6, V.E5); // 1. Front projecting left eave
+  addEaveSegment(V.E5, V.E4); // 2. Valley return eave
+  addEaveSegment(V.E4, V.E3); // 3. Front setback right eave
+  addEaveSegment(V.E3, V.E2); // 4. Right side eave
+  addEaveSegment(V.E2, V.E1); // 5. Rear eave
+  addEaveSegment(V.E1, V.E6); // 6. Left side eave
 
-  // ----------------------------------------------------
-  // (E) GABLE INFILL WALLS (Watertight upper enclosure)
-  // ----------------------------------------------------
+  // =========================================================================
+  // 6. GABLE INFILL WALLS (Watertight upper enclosure)
+  // =========================================================================
   // Bedroom 2 Front Wall Extension: from Y = 19.5 up to right roof slope (Y = 20.8) along Z = 9.6, X: 0 to 14.6
   const rWallExt = new THREE.Mesh(new THREE.BoxGeometry(14.6, 1.3, 0.8), materials.wallExterior);
   rWallExt.position.set(7.3, 20.15, 9.6);
@@ -3060,6 +3188,91 @@ function buildAbhalmayaRoof(parent) {
   const rTopSide = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.5, 24.2), materials.wallExterior);
   rTopSide.position.set(14.6, 20.2, -2.5);
   group.add(rTopSide);
+
+  // =========================================================================
+  // 7. AUTHENTIC FACADE ELEMENTS FROM BUNGALOW "आभाळमाया" PHOTO
+  // =========================================================================
+  // (A) First-Floor Bedroom 2 Front Window (Wide black-trimmed window with security grille as in photo!)
+  const b2WallBacking = new THREE.Mesh(new THREE.BoxGeometry(7.2, 8.4, 0.25), materials.wallExterior);
+  b2WallBacking.position.set(7.3, 15.0, 9.85);
+  group.add(b2WallBacking);
+
+  const b2WinGroup = new THREE.Group();
+  b2WinGroup.position.set(7.3, 15.0, 10.05);
+  
+  // Dark outer frame
+  const b2Frame = new THREE.Mesh(new THREE.BoxGeometry(6.6, 4.4, 0.22), materials.darkTeakWood);
+  b2WinGroup.add(b2Frame);
+  
+  // Tinted reflective glass
+  const b2Glass = new THREE.Mesh(new THREE.BoxGeometry(6.2, 4.0, 0.08), materials.glassWindow);
+  b2Glass.position.z = 0.05;
+  b2WinGroup.add(b2Glass);
+
+  // Black security grille bars
+  for (let bx = -2.6; bx <= 2.6; bx += 0.85) {
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 4.0, 6), materials.darkTeakWood);
+    bar.position.set(bx, 0, 0.1);
+    b2WinGroup.add(bar);
+  }
+  group.add(b2WinGroup);
+
+  // (B) First-Floor Left Room Front Window / French Door (matching dark framed unit in photo)
+  const leftWallBacking = new THREE.Mesh(new THREE.BoxGeometry(6.6, 8.4, 0.25), materials.wallExterior);
+  leftWallBacking.position.set(-7.5, 15.0, 9.85);
+  group.add(leftWallBacking);
+
+  const leftWinGroup = new THREE.Group();
+  leftWinGroup.position.set(-7.5, 15.0, 10.05);
+
+  const leftFrame = new THREE.Mesh(new THREE.BoxGeometry(6.0, 4.6, 0.22), materials.darkTeakWood);
+  leftWinGroup.add(leftFrame);
+
+  const leftGlass = new THREE.Mesh(new THREE.BoxGeometry(5.6, 4.2, 0.08), materials.glassWindow);
+  leftGlass.position.z = 0.05;
+  leftWinGroup.add(leftGlass);
+
+  for (let lx = -2.2; lx <= 2.2; lx += 0.88) {
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 4.2, 6), materials.darkTeakWood);
+    bar.position.set(lx, 0, 0.1);
+    leftWinGroup.add(bar);
+  }
+  group.add(leftWinGroup);
+
+  // (C) Outdoor Lounge Chair with Red / Orange Cushion on covered left balcony (as in photo!)
+  const chairGroup = new THREE.Group();
+  chairGroup.position.set(-6.0, 10.8, 12.8);
+  
+  const chairBase = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.35, 2.2), materials.darkTeakWood);
+  chairBase.position.y = 0.55;
+  chairGroup.add(chairBase);
+
+  // Red/Orange cushion
+  const cushionMat = new THREE.MeshStandardMaterial({ color: 0xd94b26, roughness: 0.7 });
+  const cushion = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.4, 2.0), cushionMat);
+  cushion.position.y = 0.95;
+  chairGroup.add(cushion);
+
+  const backRest = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.4, 0.35), cushionMat);
+  backRest.position.set(0, 1.6, -0.85);
+  chairGroup.add(backRest);
+  group.add(chairGroup);
+
+  // (D) Right Exterior Side Wall 4 Horizontal Accent Groove Lines (Reveals as seen in photo!)
+  const grooveMat = new THREE.MeshStandardMaterial({ color: 0x9e988f, roughness: 0.9 });
+  for (let gy of [4.8, 6.4, 8.0, 9.6]) {
+    const groove = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 24.2), grooveMat);
+    groove.position.set(14.68, gy, -2.5);
+    group.add(groove);
+  }
+
+  // (E) Ground-Floor Porch Left Privacy Wooden Louvers (matching photo vertical slats!)
+  for (let pz = 9.8; pz <= 14.4; pz += 1.0) {
+    const louver = new THREE.Mesh(new THREE.BoxGeometry(0.14, 7.8, 0.4), materials.darkTeakWood);
+    louver.position.set(-14.3, 6.7, pz);
+    louver.castShadow = true;
+    group.add(louver);
+  }
 
   // Water tank on rear deck
   buildSintexWaterTank(group, 4.5, 24.5, -10.5);
@@ -3511,6 +3724,7 @@ function updateRoofStyleVisibility() {
   if (frontBalustradeTeakGroup) frontBalustradeTeakGroup.visible = !isAbhalmaya;
   if (modernBalcPostsGroup) modernBalcPostsGroup.visible = isModern;
   if (abhalmayaPlaqueGroup) abhalmayaPlaqueGroup.visible = isAbhalmaya;
+  if (balconyBistroFurnitureGroup) balconyBistroFurnitureGroup.visible = !isAbhalmaya;
 }
 
 function setLightingMode(mode) {
