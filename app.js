@@ -4271,6 +4271,17 @@ const ROOF_STYLES = [
 // Roof Style Controller
 function setRoofStyle(styleId) {
   state.roofStyle = styleId;
+
+  // CRITICAL: Ensure roof is visible and active floor is full
+  if (state.activeFloor === 'roof-off' || state.activeFloor === 'ground') {
+    setFloorLevel('full');
+  } else {
+    if (roofGroup) {
+      roofGroup.visible = true;
+      roofGroup.position.set(0, 0, 0);
+    }
+  }
+
   updateRoofStyleVisibility();
 
   const styleObj = ROOF_STYLES.find(s => s.id === styleId) || ROOF_STYLES[0];
@@ -4502,18 +4513,7 @@ function selectRoom(roomId) {
     document.getElementById('room-detail-desc').textContent = data.desc;
     document.getElementById('room-detail-vastu').textContent = '🧭 ' + data.vastu;
 
-    // Auto switch floor level to make room visible
-    if (['porch', 'living', 'pooja', 'stairs', 'kitchen', 'kitchen-exit', 'bed1', 'toilet-ground'].includes(roomId)) {
-      if (state.activeFloor === 'roof-off') {
-        // Can see it
-      } else if (state.activeFloor === 'full') {
-        setFloorLevel('roof-off');
-      }
-    } else if (['void', 'passage', 'bed2', 'toilet-first', 'bed3', 'balcony-front', 'balcony-bed2', 'balcony-rear'].includes(roomId)) {
-      if (state.activeFloor === 'ground') {
-        setFloorLevel('roof-off');
-      }
-    }
+    // Keep current roof and floor visibility intact (do not auto-remove roof)
 
     // Smoothly focus camera towards the room
     const targetMesh = roomMeshMap[roomId];
@@ -4562,8 +4562,10 @@ function setupEventListeners() {
 
       const view = btn.dataset.view;
       if (view === 'hero') {
+        if (state.activeFloor === 'roof-off' || state.activeFloor === 'ground') setFloorLevel('full');
         moveCameraTo({ x: -34, y: 20, z: 42 }, { x: 0, y: 10, z: 4 });
       } else if (view === 'front') {
+        if (state.activeFloor === 'roof-off' || state.activeFloor === 'ground') setFloorLevel('full');
         moveCameraTo({ x: 0, y: 13, z: 58 }, { x: 0, y: 11, z: 6 });
       } else if (view === 'top') {
         moveCameraTo({ x: 0, y: 68, z: 0.1 }, { x: 0, y: 0, z: 0 });
@@ -4712,16 +4714,43 @@ function setupEventListeners() {
     }
   });
 
-  // Raycasting Click & Hover on Canvas
+  // Raycasting Click & Hover on Canvas (Drag-safe & Roof-aware)
   const canvas = document.getElementById('webgl-canvas');
   const tag = document.getElementById('room-tag');
 
+  let pointerDownX = 0;
+  let pointerDownY = 0;
+  let pointerDownTime = 0;
+
   canvas.addEventListener('pointerdown', (e) => {
+    pointerDownX = e.clientX;
+    pointerDownY = e.clientY;
+    pointerDownTime = performance.now();
+  });
+
+  canvas.addEventListener('pointerup', (e) => {
+    const dist = Math.hypot(e.clientX - pointerDownX, e.clientY - pointerDownY);
+    const duration = performance.now() - pointerDownTime;
+
+    // If user dragged to orbit/pan camera (moved > 6px or held > 600ms), do NOT treat as click!
+    if (dist > 6 || duration > 600) return;
+
     const rect = canvas.getBoundingClientRect();
     mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
+
+    // If full roof is active and user clicks on the roof, open roof selector modal!
+    if (state.activeFloor === 'full' && roofGroup && roofGroup.visible) {
+      const roofIntersects = raycaster.intersectObject(roofGroup, true);
+      if (roofIntersects.length > 0) {
+        openRoofModal();
+        return;
+      }
+    }
+
+    // Only inspect interior rooms if roof is off or exploded or user clicked an exposed room
     const hitboxes = Object.values(roomMeshMap);
     const intersects = raycaster.intersectObjects(hitboxes);
 
@@ -4739,6 +4768,20 @@ function setupEventListeners() {
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
+
+    // If full roof is visible and mouse is hovering over the roof, show roof style tag
+    if (state.activeFloor === 'full' && roofGroup && roofGroup.visible) {
+      const roofIntersects = raycaster.intersectObject(roofGroup, true);
+      if (roofIntersects.length > 0) {
+        const currentStyle = ROOF_STYLES.find(s => s.id === state.roofStyle);
+        tag.style.display = 'block';
+        tag.style.left = e.clientX + 'px';
+        tag.style.top = (e.clientY - 12) + 'px';
+        tag.innerHTML = `<strong>📐 ${currentStyle ? currentStyle.name : 'Roof'}</strong><br><span style="color: #ff9d80;">Click to select roof design</span>`;
+        return;
+      }
+    }
+
     const hitboxes = Object.values(roomMeshMap);
     const intersects = raycaster.intersectObjects(hitboxes);
 
