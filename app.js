@@ -7,6 +7,7 @@
 // Global State
 const state = {
   activeFloor: 'full',      // 'full', 'roof-off', 'ground', 'exploded'
+  roofStyle: 'modern-skillion', // 'modern-skillion' (default matching reference image) or 'konkan-hipped'
   lightingMode: 'daylight', // 'daylight', 'monsoon', 'golden', 'night'
   rainActive: false,
   xrayMode: false,
@@ -16,7 +17,7 @@ const state = {
 
 // Scene, Camera, Renderer, Controls
 let scene, camera, renderer, controls;
-let groundFloorGroup, firstFloorGroup, roofGroup, environmentGroup, dimensionGroup;
+let groundFloorGroup, firstFloorGroup, roofGroup, modernRoofGroup, konkanRoofGroup, porchKonkanRoof, environmentGroup, dimensionGroup;
 let rainParticles, rainCascades, rainSplashes;
 let dirLight, ambientLight, interiorLights = [];
 let raycaster, mouse;
@@ -379,6 +380,37 @@ function initMaterials() {
       roughness: 0.75,
       metalness: 0.05,
       color: 0xffffff // Retain full vibrant warm beige/tan ashlar blocks
+    }),
+
+    // Modern Split Skillion Roof Materials (Matching Attached Modern Reference Image)
+    modernRoofDark: new THREE.MeshStandardMaterial({
+      color: 0x222730, // Sleek dark charcoal / standing seam architectural metal finish
+      roughness: 0.35,
+      metalness: 0.28
+    }),
+    modernFasciaWhite: new THREE.MeshStandardMaterial({
+      color: 0xf5f6f8, // Crisp bold modern white/light-grey fascia
+      roughness: 0.25,
+      metalness: 0.05
+    }),
+    modernFasciaDark: new THREE.MeshStandardMaterial({
+      color: 0x161a22, // Dark modern accent reveal groove
+      roughness: 0.45,
+      metalness: 0.12
+    }),
+    modernSlatWhite: new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.32,
+      metalness: 0.05
+    }),
+    modernClerestoryGlass: new THREE.MeshPhysicalMaterial({
+      color: 0x60a5fa,
+      transmission: 0.85,
+      opacity: 0.72,
+      transparent: true,
+      roughness: 0.05,
+      metalness: 0.15,
+      ior: 1.52
     }),
 
     // Walls
@@ -1272,18 +1304,20 @@ function buildHouseModel() {
   porchBeam.castShadow = true;
   groundFloorGroup.add(porchBeam);
 
-  // GROUND FLOOR SLOPING TERRACOTTA ROOF EAVE (ONLY in front of Porch, NOT in front of Master Bedroom 1)
+  // GROUND FLOOR SLOPING TERRACOTTA ROOF EAVE (Konkan Style Awning, switchable)
+  porchKonkanRoof = new THREE.Group();
   const porchRoofGeo = new THREE.BoxGeometry(15.2, 0.55, 5.5);
   const porchRoof = new THREE.Mesh(porchRoofGeo, materials.roofTile);
   porchRoof.position.set(-7.3, 10.8, 14.8);
   porchRoof.rotation.x = THREE.MathUtils.degToRad(22);
   porchRoof.castShadow = true;
-  groundFloorGroup.add(porchRoof);
+  porchKonkanRoof.add(porchRoof);
 
   const porchSoffit = new THREE.Mesh(new THREE.BoxGeometry(15.4, 0.2, 5.6), materials.whiteSoffit);
   porchSoffit.position.set(-7.3, 10.55, 14.8);
   porchSoffit.rotation.x = THREE.MathUtils.degToRad(22);
-  groundFloorGroup.add(porchSoffit);
+  porchKonkanRoof.add(porchSoffit);
+  groundFloorGroup.add(porchKonkanRoof);
 
   // (C) Exterior & Interior Walls (Ground Floor: Y: 2.5 to 10.5, Height = 8)
   buildGroundWalls(groundFloorGroup);
@@ -1392,9 +1426,18 @@ function buildHouseModel() {
   buildFirstInterior(firstFloorGroup);
 
   // ==========================================
-  // 3. ROOF GROUP (Konkan Slanted Sloping Roof)
+  // 3. ROOF GROUP (Dual-Style: Modern Split Skillion & Traditional Konkan)
   // ==========================================
-  buildKonkanSlantRoof(roofGroup);
+  modernRoofGroup = new THREE.Group();
+  konkanRoofGroup = new THREE.Group();
+
+  buildModernSkillionRoof(modernRoofGroup);
+  buildKonkanSlantRoof(konkanRoofGroup);
+
+  roofGroup.add(modernRoofGroup);
+  roofGroup.add(konkanRoofGroup);
+
+  updateRoofStyleVisibility();
 
   // ==========================================
   // 4. ROOM HITBOXES FOR 3D CLICK / INSPECTION
@@ -2077,6 +2120,299 @@ function addWindowWithChajja(parent, x, y, z, w, h, facing) {
 }
 
 // ==========================================
+// 3A. MODERN SPLIT SKILLION (SHED) ROOF DESIGN
+// (Directly matching the user's reference image!)
+// - High left mono-pitch skillion roof (17.5° slope down to left)
+// - Lower right mono-pitch skillion roof (13.5° slope down to right)
+// - Vertical clerestory offset step with ribbon windows
+// - Bold, thick crisp white modern fascia framing (1.35 ft thick)
+// - Sleek charcoal standing seam / modern architectural metal panels
+// - Modern cantilevered flat box porch canopy with layered trim & stone-clad pillar
+// - Crisp white vertical privacy slat screen (brise-soleil fins)
+// ==========================================
+function buildModernSkillionRoof(parent) {
+  const group = new THREE.Group();
+
+  // ----------------------------------------------------
+  // (A) LEFT HIGH SHED / SKILLION ROOF (Over Living Void & Mezzanine)
+  // Slopes down from center ridge (X = +2.7, Y = 27.6) to left eave (X = -18.8, Y = 20.8)
+  // ----------------------------------------------------
+  const leftShedGroup = new THREE.Group();
+  leftShedGroup.position.set(-8.05, 24.2, 0);
+  leftShedGroup.rotation.z = THREE.MathUtils.degToRad(17.5);
+
+  // 1. Dark Charcoal Standing-Seam Metal Roof Slab
+  const lRoofGeo = new THREE.BoxGeometry(22.6, 0.55, 35.2);
+  const lRoofMesh = new THREE.Mesh(lRoofGeo, materials.modernRoofDark);
+  lRoofMesh.castShadow = true;
+  lRoofMesh.receiveShadow = true;
+  leftShedGroup.add(lRoofMesh);
+
+  // Standing seam decorative ribs along Z axis
+  for (let rx = -10.0; rx <= 10.0; rx += 2.0) {
+    const ribGeo = new THREE.BoxGeometry(0.12, 0.18, 35.1);
+    const rib = new THREE.Mesh(ribGeo, materials.modernRoofDark);
+    rib.position.set(rx, 0.35, 0);
+    rib.castShadow = true;
+    leftShedGroup.add(rib);
+  }
+
+  // 2. Crisp White Underside Soffit
+  const lSoffitGeo = new THREE.BoxGeometry(22.4, 0.18, 35.0);
+  const lSoffitMesh = new THREE.Mesh(lSoffitGeo, materials.modernFasciaWhite);
+  lSoffitMesh.position.set(0, -0.32, 0);
+  leftShedGroup.add(lSoffitMesh);
+
+  // 3. Bold Front & Rear Sloping Fascia Boards (Angled along the roof slope)
+  for (let fz of [17.55, -17.55]) {
+    // Outer white fascia body
+    const fasciaGeo = new THREE.BoxGeometry(22.7, 1.35, 0.35);
+    const fasciaMesh = new THREE.Mesh(fasciaGeo, materials.modernFasciaWhite);
+    fasciaMesh.position.set(0, 0, fz);
+    fasciaMesh.castShadow = true;
+    leftShedGroup.add(fasciaMesh);
+
+    // Dark architectural reveal groove inside fascia
+    const grooveGeo = new THREE.BoxGeometry(22.7, 0.32, 0.38);
+    const grooveMesh = new THREE.Mesh(grooveGeo, materials.modernFasciaDark);
+    grooveMesh.position.set(0, 0, fz);
+    leftShedGroup.add(grooveMesh);
+  }
+
+  // 4. Left Low Eave Fascia (Facing outward to the left)
+  const lEaveFascia = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.35, 35.3), materials.modernFasciaWhite);
+  lEaveFascia.position.set(-11.35, 0, 0);
+  lEaveFascia.castShadow = true;
+  leftShedGroup.add(lEaveFascia);
+
+  // 5. High Ridge Capping at apex
+  const lRidgeCap = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 35.3), materials.modernFasciaWhite);
+  lRidgeCap.position.set(11.35, 0, 0);
+  lRidgeCap.castShadow = true;
+  leftShedGroup.add(lRidgeCap);
+
+  group.add(leftShedGroup);
+
+  // ----------------------------------------------------
+  // (B) RIGHT LOWER SHED / SKILLION ROOF (Over Bedroom 2 & 3)
+  // Starts at X = +1.5 (Y = 24.2), slopes down to right eave (X = +19.0, Y = 19.9)
+  // ----------------------------------------------------
+  const rightShedGroup = new THREE.Group();
+  rightShedGroup.position.set(10.25, 22.05, 0);
+  rightShedGroup.rotation.z = THREE.MathUtils.degToRad(-13.5);
+
+  // 1. Dark Charcoal Standing-Seam Metal Roof Slab
+  const rRoofGeo = new THREE.BoxGeometry(18.2, 0.55, 35.2);
+  const rRoofMesh = new THREE.Mesh(rRoofGeo, materials.modernRoofDark);
+  rRoofMesh.castShadow = true;
+  rRoofMesh.receiveShadow = true;
+  rightShedGroup.add(rRoofMesh);
+
+  // Standing seam ribs
+  for (let rx = -8.0; rx <= 8.0; rx += 2.0) {
+    const ribGeo = new THREE.BoxGeometry(0.12, 0.18, 35.1);
+    const rib = new THREE.Mesh(ribGeo, materials.modernRoofDark);
+    rib.position.set(rx, 0.35, 0);
+    rib.castShadow = true;
+    rightShedGroup.add(rib);
+  }
+
+  // 2. White Soffit
+  const rSoffitGeo = new THREE.BoxGeometry(18.0, 0.18, 35.0);
+  const rSoffitMesh = new THREE.Mesh(rSoffitGeo, materials.modernFasciaWhite);
+  rSoffitMesh.position.set(0, -0.32, 0);
+  rightShedGroup.add(rSoffitMesh);
+
+  // 3. Bold Front & Rear Sloping Fascia Boards
+  for (let fz of [17.55, -17.55]) {
+    const fasciaGeo = new THREE.BoxGeometry(18.3, 1.35, 0.35);
+    const fasciaMesh = new THREE.Mesh(fasciaGeo, materials.modernFasciaWhite);
+    fasciaMesh.position.set(0, 0, fz);
+    fasciaMesh.castShadow = true;
+    rightShedGroup.add(fasciaMesh);
+
+    const grooveGeo = new THREE.BoxGeometry(18.3, 0.32, 0.38);
+    const grooveMesh = new THREE.Mesh(grooveGeo, materials.modernFasciaDark);
+    grooveMesh.position.set(0, 0, fz);
+    rightShedGroup.add(grooveMesh);
+  }
+
+  // 4. Right Low Eave Fascia
+  const rEaveFascia = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.35, 35.3), materials.modernFasciaWhite);
+  rEaveFascia.position.set(9.15, 0, 0);
+  rEaveFascia.castShadow = true;
+  rightShedGroup.add(rEaveFascia);
+
+  // 5. High Edge Flashing
+  const rHighCap = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 35.3), materials.modernFasciaWhite);
+  rHighCap.position.set(-9.15, 0, 0);
+  rightShedGroup.add(rHighCap);
+
+  group.add(rightShedGroup);
+
+  // ----------------------------------------------------
+  // (C) VERTICAL CLERESTORY OFFSET WALL & RIBBON WINDOWS
+  // Connects the high ridge of left roof down to top of right roof
+  // ----------------------------------------------------
+  const clerestoryGroup = new THREE.Group();
+  clerestoryGroup.position.set(2.0, 25.6, 0);
+
+  // Solid exterior wall backing
+  const clWallGeo = new THREE.BoxGeometry(0.6, 3.2, 33.0);
+  const clWall = new THREE.Mesh(clWallGeo, materials.wallExterior);
+  clWall.castShadow = true;
+  clerestoryGroup.add(clWall);
+
+  // High Clerestory Ribbon Glazing strip (facing right elevation)
+  const clWindowFrame = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.2, 31.0), materials.modernFasciaDark);
+  clWindowFrame.position.set(0.35, 0.1, 0);
+  clerestoryGroup.add(clWindowFrame);
+
+  const clGlass = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.9, 30.6), materials.modernClerestoryGlass);
+  clGlass.position.set(0.38, 0.1, 0);
+  clerestoryGroup.add(clGlass);
+
+  // Vertical black mullions
+  for (let mz = -13.0; mz <= 13.0; mz += 4.5) {
+    const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.28, 2.0, 0.18), materials.modernFasciaDark);
+    mullion.position.set(0.36, 0.1, mz);
+    clerestoryGroup.add(mullion);
+  }
+
+  group.add(clerestoryGroup);
+
+  // ----------------------------------------------------
+  // (D) TRIANGULAR GABLE WALL INFILLS (Watertight upper enclosure)
+  // ----------------------------------------------------
+  function buildGableInfill(x1, y1, x2, y2, x3, y3, x4, y4, zPos, depth) {
+    const shape = new THREE.Shape();
+    shape.moveTo(x1, y1);
+    shape.lineTo(x2, y2);
+    shape.lineTo(x3, y3);
+    shape.lineTo(x4, y4);
+    shape.closePath();
+    const extrudeGeo = new THREE.ExtrudeGeometry(shape, { depth: depth, bevelEnabled: false });
+    const mesh = new THREE.Mesh(extrudeGeo, materials.wallExterior);
+    mesh.position.set(0, 0, zPos);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
+  // Left Front Gable Infill (X: -14.6 to +2.0, Y: 19.5 to slope)
+  const lFrontGable = buildGableInfill(-14.6, 19.5, 2.0, 19.5, 2.0, 27.2, -14.6, 22.0, 13.8, 0.8);
+  group.add(lFrontGable);
+
+  // Left Rear Gable Infill
+  const lRearGable = buildGableInfill(-14.6, 19.5, 2.0, 19.5, 2.0, 27.2, -14.6, 22.0, -14.6, 0.8);
+  group.add(lRearGable);
+
+  // Right Front Gable Infill (X: +2.0 to +14.6, Y: 19.5 to slope)
+  const rFrontGable = buildGableInfill(2.0, 19.5, 14.6, 19.5, 14.6, 20.8, 2.0, 24.0, 13.8, 0.8);
+  group.add(rFrontGable);
+
+  // Right Rear Gable Infill
+  const rRearGable = buildGableInfill(2.0, 19.5, 14.6, 19.5, 14.6, 20.8, 2.0, 24.0, -14.6, 0.8);
+  group.add(rRearGable);
+
+  // Left & Right Upper Wall Extents
+  const lTopWall = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.5, 28.4), materials.wallExterior);
+  lTopWall.position.set(-14.6, 20.75, 0);
+  lTopWall.castShadow = true;
+  group.add(lTopWall);
+
+  const rTopWall = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.4, 28.4), materials.wallExterior);
+  rTopWall.position.set(14.6, 20.2, 0);
+  rTopWall.castShadow = true;
+  group.add(rTopWall);
+
+  // ----------------------------------------------------
+  // (E) MODERN CANTILEVERED FLAT BOX PORCH CANOPY (Matching Attached Photo!)
+  // ----------------------------------------------------
+  const porchCanopyGroup = new THREE.Group();
+  porchCanopyGroup.position.set(-7.3, 10.4, 14.8);
+
+  // 1. Main White Horizontal Box Slab
+  const boxGeo = new THREE.BoxGeometry(15.4, 1.1, 5.6);
+  const boxMesh = new THREE.Mesh(boxGeo, materials.modernFasciaWhite);
+  boxMesh.castShadow = true;
+  boxMesh.receiveShadow = true;
+  porchCanopyGroup.add(boxMesh);
+
+  // 2. Layered Recessed Dark Accent Band (signature modern detail from reference image!)
+  const recessGeo = new THREE.BoxGeometry(15.55, 0.35, 5.75);
+  const recessMesh = new THREE.Mesh(recessGeo, materials.modernFasciaDark);
+  porchCanopyGroup.add(recessMesh);
+
+  // 3. Crisp White Ceiling Soffit with Warm Recessed LED Downlights
+  const pSoffit = new THREE.Mesh(new THREE.BoxGeometry(15.2, 0.1, 5.4), materials.whiteSoffit);
+  pSoffit.position.set(0, -0.58, 0);
+  porchCanopyGroup.add(pSoffit);
+
+  // Recessed warm LED spotlights underneath
+  for (let lx of [-4.5, 0, 4.5]) {
+    const sLight = new THREE.PointLight(0xffb86c, 1.2, 12);
+    sLight.position.set(lx, -0.8, 0);
+    porchCanopyGroup.add(sLight);
+
+    // Fixture ring
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.05, 12), materials.modernFasciaDark);
+    ring.position.set(lx, -0.56, 0);
+    porchCanopyGroup.add(ring);
+  }
+
+  // 4. Modern Square Stone-Clad Pillar at outer front corner (matching photo!)
+  const modernColGeo = new THREE.BoxGeometry(1.2, 7.8, 1.2);
+  const modernCol = new THREE.Mesh(modernColGeo, materials.stoneCladding);
+  modernCol.position.set(-6.2, -4.5, -0.6); // (-13.5 in world space)
+  modernCol.castShadow = true;
+  porchCanopyGroup.add(modernCol);
+
+  // Stone pillar white capital and plinth bands
+  for (let py of [-0.65, -8.3]) {
+    const colCap = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.25, 1.4), materials.modernFasciaWhite);
+    colCap.position.set(-6.2, py, -0.6);
+    porchCanopyGroup.add(colCap);
+  }
+
+  group.add(porchCanopyGroup);
+
+  // ----------------------------------------------------
+  // (F) MODERN VERTICAL PRIVACY SLAT SCREEN (BRISE-SOLEIL FINS)
+  // (Matching the white vertical slat screen in the attached reference photo!)
+  // ----------------------------------------------------
+  const slatGroup = new THREE.Group();
+  slatGroup.position.set(0.2, 6.4, 14.6);
+
+  // Top and bottom mounting rails
+  const railGeo = new THREE.BoxGeometry(3.6, 0.18, 0.35);
+  const railTop = new THREE.Mesh(railGeo, materials.modernFasciaDark);
+  railTop.position.set(1.8, 3.8, 0);
+  slatGroup.add(railTop);
+
+  const railBot = new THREE.Mesh(railGeo, materials.modernFasciaDark);
+  railBot.position.set(1.8, -3.8, 0);
+  slatGroup.add(railBot);
+
+  // Series of vertical white architectural fins
+  for (let fx = 0.3; fx <= 3.3; fx += 0.45) {
+    const finGeo = new THREE.BoxGeometry(0.12, 7.6, 0.32);
+    const fin = new THREE.Mesh(finGeo, materials.modernSlatWhite);
+    fin.position.set(fx, 0, 0);
+    fin.castShadow = true;
+    slatGroup.add(fin);
+  }
+
+  group.add(slatGroup);
+
+  // Sintex Water Tank on rear utility deck
+  buildSintexWaterTank(group, 4.5, 23.8, -10.5);
+
+  parent.add(group);
+  return group;
+}
+
+// ==========================================
 // 3. KONKAN SLANTED ROOF ARCHITECTURE
 // ==========================================
 function buildKonkanSlantRoof(parent) {
@@ -2640,6 +2976,48 @@ function setFloorLevel(level) {
   }
 }
 
+// Roof Style Controller (Modern Split Skillion vs Traditional Konkan)
+function setRoofStyle(style) {
+  state.roofStyle = style;
+  updateRoofStyleVisibility();
+
+  const isModern = (style === 'modern-skillion');
+  const label = isModern ? 'Modern Split Skillion Roof (Image Design)' : 'Traditional Konkan Hipped Roof';
+  showToast('Switched to ' + label);
+
+  const headerLabel = document.getElementById('roof-style-label');
+  if (headerLabel) {
+    headerLabel.textContent = isModern ? 'Roof: Modern Skillion' : 'Roof: Konkan Hipped';
+  }
+
+  const btnHeader = document.getElementById('btn-toggle-roof-style');
+  if (btnHeader) {
+    btnHeader.classList.toggle('active', isModern);
+  }
+
+  const btnDock = document.getElementById('btn-dock-roof-style');
+  if (btnDock) {
+    btnDock.classList.toggle('active', isModern);
+    const spanText = btnDock.querySelector('.roof-text');
+    if (spanText) {
+      spanText.textContent = isModern ? 'Modern Skillion Roof' : 'Traditional Konkan Roof';
+    }
+  }
+}
+
+function updateRoofStyleVisibility() {
+  const isModern = (state.roofStyle === 'modern-skillion');
+  if (modernRoofGroup) {
+    modernRoofGroup.visible = isModern;
+  }
+  if (konkanRoofGroup) {
+    konkanRoofGroup.visible = !isModern;
+  }
+  if (porchKonkanRoof) {
+    porchKonkanRoof.visible = !isModern;
+  }
+}
+
 function setLightingMode(mode) {
   state.lightingMode = mode;
   const icon = document.getElementById('lighting-icon');
@@ -2847,6 +3225,16 @@ function setupEventListeners() {
 
   // X-Ray Mode
   document.getElementById('btn-xray').addEventListener('click', toggleXray);
+
+  // Roof Style Toggle (Modern Split Skillion vs Traditional Konkan)
+  const handleRoofStyleToggle = () => {
+    const nextStyle = state.roofStyle === 'modern-skillion' ? 'konkan-hipped' : 'modern-skillion';
+    setRoofStyle(nextStyle);
+  };
+  const btnRoofHeader = document.getElementById('btn-toggle-roof-style');
+  if (btnRoofHeader) btnRoofHeader.addEventListener('click', handleRoofStyleToggle);
+  const btnRoofDock = document.getElementById('btn-dock-roof-style');
+  if (btnRoofDock) btnRoofDock.addEventListener('click', handleRoofStyleToggle);
 
   // Room Pills Click
   document.querySelectorAll('.room-pill').forEach(pill => {
