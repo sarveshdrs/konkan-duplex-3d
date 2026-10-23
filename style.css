@@ -926,3 +926,114 @@ body {
     max-width: 100vw;
   }
 }
+
+/* Roof Design Selector Modal & Cards */
+.roof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .roof-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 550px) {
+  .roof-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.roof-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.roof-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(234, 88, 12, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.roof-card.active {
+  background: rgba(234, 88, 12, 0.14);
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 0 1px var(--accent-orange), 0 8px 24px rgba(234, 88, 12, 0.25);
+}
+
+.roof-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.roof-card-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.roof-card-title,
+.roof-card h4 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.roof-card-desc,
+.roof-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+  flex: 1;
+}
+
+.roof-card-tag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  display: inline-block;
+}
+
+.roof-card.active .roof-card-tag {
+  background: rgba(234, 88, 12, 0.3);
+  color: #ffedd5;
+}
+
+.roof-card-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.roof-card.active .roof-card-status {
+  background: var(--accent-orange);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);
+}
+

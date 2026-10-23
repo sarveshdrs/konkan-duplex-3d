@@ -18,7 +18,7 @@ const state = {
 // Scene, Camera, Renderer, Controls
 let scene, camera, renderer, controls;
 let groundFloorGroup, firstFloorGroup, roofGroup;
-let modernRoofGroup, konkanRoofGroup, abhalmayaRoofGroup, porchKonkanRoof;
+let modernRoofGroup, konkanRoofGroup, abhalmayaRoofGroup, flatRoofGroup, pyramidRoofGroup, butterflyRoofGroup, porchKonkanRoof;
 let frontBalustradeTeakGroup, frontBalustradeGlassGroup, modernBalcPostsGroup, abhalmayaPlaqueGroup;
 let balconyBistroFurnitureGroup;
 let environmentGroup, dimensionGroup;
@@ -1668,17 +1668,28 @@ function buildHouseModel() {
   // ==========================================
   // 3. ROOF GROUP (Tri-Style: Abhalmaya Compound Hip, Modern Skillion, & Traditional Konkan)
   // ==========================================
+  // 3. ROOF GROUP (6 Distinct Architectural Styles)
+  // ==========================================
   modernRoofGroup = new THREE.Group();
   konkanRoofGroup = new THREE.Group();
   abhalmayaRoofGroup = new THREE.Group();
+  flatRoofGroup = new THREE.Group();
+  pyramidRoofGroup = new THREE.Group();
+  butterflyRoofGroup = new THREE.Group();
 
   buildModernSkillionRoof(modernRoofGroup);
   buildKonkanSlantRoof(konkanRoofGroup);
   buildAbhalmayaRoof(abhalmayaRoofGroup);
+  buildFlatBoxTerraceRoof(flatRoofGroup);
+  buildPyramidHeritageRoof(pyramidRoofGroup);
+  buildModernButterflyRoof(butterflyRoofGroup);
 
   roofGroup.add(modernRoofGroup);
   roofGroup.add(konkanRoofGroup);
   roofGroup.add(abhalmayaRoofGroup);
+  roofGroup.add(flatRoofGroup);
+  roofGroup.add(pyramidRoofGroup);
+  roofGroup.add(butterflyRoofGroup);
 
   updateRoofStyleVisibility();
 
@@ -3281,6 +3292,531 @@ function buildAbhalmayaRoof(parent) {
   return group;
 }
 
+// =========================================================================
+// OPTION 2: PLAIN SQUARE FLAT ROOF & ROOFTOP TERRACE (MODERN BOX VILLA)
+// Minimalist flat roof with 3.2 ft parapet walls, staircase mumty headhouse,
+// photovoltaic solar panels, and outdoor aluminum pergola rooftop lounge.
+// =========================================================================
+function buildFlatBoxTerraceRoof(parent) {
+  const group = new THREE.Group();
+
+  // (A) Reinforced Concrete Flat Roof Slab with Outdoor Rooftop Pavers
+  // Spans full building footprint: X: -15.2 to +15.2, Z: -15.2 to +12.0 at Y = 19.5 to 20.1
+  const slabGeo = new THREE.BoxGeometry(30.4, 0.6, 27.2);
+  const slab = new THREE.Mesh(slabGeo, materials.floorTerracotta);
+  slab.position.set(0, 19.8, -1.6);
+  slab.receiveShadow = true;
+  group.add(slab);
+
+  // Underside ceiling soffit (pure white)
+  const soffit = new THREE.Mesh(new THREE.BoxGeometry(30.6, 0.15, 27.4), materials.whiteSoffit);
+  soffit.position.set(0, 19.45, -1.6);
+  group.add(soffit);
+
+  // (B) Perimeter White Parapet Walls (3.2 ft high: Y: 20.1 to 23.3, thickness = 0.8 ft)
+  const parapetH = 3.2;
+  const parapetY = 20.1 + parapetH / 2; // Y = 21.7
+
+  function addParapet(x, z, w, d) {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, parapetH, d), materials.wallExterior);
+    wall.position.set(x, parapetY, z);
+    wall.castShadow = true;
+    wall.receiveShadow = true;
+    group.add(wall);
+
+    // Dark aluminum coping cap on top of parapet
+    const coping = new THREE.Mesh(new THREE.BoxGeometry(w + (d > w ? 0.3 : 0), 0.25, d + (w > d ? 0.3 : 0)), materials.modernFasciaDark);
+    coping.position.set(x, 23.35, z);
+    coping.castShadow = true;
+    group.add(coping);
+  }
+
+  // Left parapet wall (X = -15.0, Z: -15.2 to +12.0)
+  addParapet(-15.0, -1.6, 0.8, 27.2);
+  // Right parapet wall (X = +15.0, Z: -15.2 to +12.0)
+  addParapet(15.0, -1.6, 0.8, 27.2);
+  // Rear parapet wall (Z = -15.2, X: -15.0 to +15.0)
+  addParapet(0, -15.2, 30.8, 0.8);
+  // Front parapet wall sections with central glass viewing balustrade cutout
+  addParapet(-10.5, 12.0, 9.8, 0.8); // Left front section
+  addParapet(10.5, 12.0, 9.8, 0.8);  // Right front section
+
+  // Front viewing tempered glass railing in parapet opening (X: -5.6 to +5.6 at Z = 12.0)
+  const glassPanel = new THREE.Mesh(new THREE.BoxGeometry(11.2, 2.9, 0.08), materials.balconyGlass);
+  glassPanel.position.set(0, 21.65, 12.0);
+  group.add(glassPanel);
+
+  const glassTopRail = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 11.2, 12), materials.stainlessSteel);
+  glassTopRail.position.set(0, 23.15, 12.0);
+  glassTopRail.rotation.z = Math.PI / 2;
+  group.add(glassTopRail);
+
+  // (C) Staircase Headhouse / Mumty Cabin (Rear-Left: X: -14.6 to -5.0, Z: -14.6 to -5.0)
+  // Enclosing stairs up to the rooftop terrace!
+  const mumtyGroup = new THREE.Group();
+  const mumtyH = 7.4;
+  const mumtyY = 20.1 + mumtyH / 2; // Y = 23.8
+  
+  // Left wall (flush with building edge)
+  const mLeft = new THREE.Mesh(new THREE.BoxGeometry(0.8, mumtyH, 9.6), materials.wallExterior);
+  mLeft.position.set(-14.6, mumtyY, -9.8);
+  mumtyGroup.add(mLeft);
+  
+  // Rear wall
+  const mRear = new THREE.Mesh(new THREE.BoxGeometry(9.6, mumtyH, 0.8), materials.wallExterior);
+  mRear.position.set(-9.8, mumtyY, -14.6);
+  mumtyGroup.add(mRear);
+
+  // Right wall
+  const mRight = new THREE.Mesh(new THREE.BoxGeometry(0.8, mumtyH, 9.6), materials.wallExterior);
+  mRight.position.set(-5.0, mumtyY, -9.8);
+  mumtyGroup.add(mRight);
+
+  // Front wall with modern frosted glass rooftop door
+  const mFrontLeft = new THREE.Mesh(new THREE.BoxGeometry(4.2, mumtyH, 0.8), materials.wallExterior);
+  mFrontLeft.position.set(-12.5, mumtyY, -5.0);
+  mumtyGroup.add(mFrontLeft);
+
+  const mFrontLintel = new THREE.Mesh(new THREE.BoxGeometry(5.4, 1.4, 0.8), materials.wallExterior);
+  mFrontLintel.position.set(-7.7, 26.8, -5.0);
+  mumtyGroup.add(mFrontLintel);
+
+  // Frosted glass door & frame (X = -7.7, Y = 20.1 to 26.1)
+  const mDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(4.2, 6.2, 0.25), materials.modernFasciaDark);
+  mDoorFrame.position.set(-7.7, 23.2, -5.0);
+  mumtyGroup.add(mDoorFrame);
+
+  const mDoorGlass = new THREE.Mesh(new THREE.BoxGeometry(3.8, 5.8, 0.08), materials.balconyGlass);
+  mDoorGlass.position.set(-7.7, 23.2, -5.0);
+  mumtyGroup.add(mDoorGlass);
+
+  // Cantilevered flat roof slab over Mumty (Y = 27.6)
+  const mRoof = new THREE.Mesh(new THREE.BoxGeometry(11.2, 0.5, 11.2), materials.modernFasciaWhite);
+  mRoof.position.set(-9.8, 27.6, -9.8);
+  mRoof.castShadow = true;
+  mumtyGroup.add(mRoof);
+
+  // 3 Photovoltaic Solar Panels angled at 15° facing South on Mumty roof
+  const solarGroup = new THREE.Group();
+  solarGroup.position.set(-9.8, 28.1, -9.8);
+  solarGroup.rotation.x = THREE.MathUtils.degToRad(15);
+  
+  const solarMat = new THREE.MeshStandardMaterial({ color: 0x111c38, roughness: 0.15, metalness: 0.85 });
+  for (let sx of [-3.2, 0, 3.2]) {
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.08, 4.8), solarMat);
+    panel.position.set(sx, 0, 0);
+    panel.castShadow = true;
+    solarGroup.add(panel);
+
+    const pBorder = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.1, 4.9), materials.stainlessSteel);
+    pBorder.position.set(sx, -0.01, 0);
+    solarGroup.add(pBorder);
+  }
+  mumtyGroup.add(solarGroup);
+
+  // Black Sintex Water Tank behind Mumty
+  buildSintexWaterTank(mumtyGroup, -6.5, 20.8, -12.5);
+
+  group.add(mumtyGroup);
+
+  // (D) Modern Black Aluminum Pergola Lounge on Right Roof Terrace
+  // Covers X: 1.5 to 13.5, Z: -2.0 to +8.0
+  const pergolaGroup = new THREE.Group();
+  const pergMat = materials.modernFasciaDark;
+
+  // 4 Black square posts
+  for (let px of [2.0, 13.0]) {
+    for (let pz of [-1.5, 7.5]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.35, 7.8, 0.35), pergMat);
+      post.position.set(px, 20.1 + 3.9, pz);
+      post.castShadow = true;
+      pergolaGroup.add(post);
+    }
+  }
+
+  // Longitudinal support beams
+  for (let px of [2.0, 13.0]) {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.55, 9.6), pergMat);
+    beam.position.set(px, 27.9, 3.0);
+    beam.castShadow = true;
+    pergolaGroup.add(beam);
+  }
+
+  // Cross trellis louvers casting modern shade lines
+  for (let tz = -1.5; tz <= 7.5; tz += 1.2) {
+    const louver = new THREE.Mesh(new THREE.BoxGeometry(11.8, 0.35, 0.12), pergMat);
+    louver.position.set(7.5, 28.15, tz);
+    louver.castShadow = true;
+    pergolaGroup.add(louver);
+  }
+
+  // Outdoor teak lounge sofa under pergola
+  const sofaBase = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.45, 2.5), materials.darkTeakWood);
+  sofaBase.position.set(7.5, 20.5, 1.0);
+  pergolaGroup.add(sofaBase);
+
+  const cushionMat = new THREE.MeshStandardMaterial({ color: 0xede8df, roughness: 0.8 });
+  const sofaCushion = new THREE.Mesh(new THREE.BoxGeometry(6.3, 0.4, 2.3), cushionMat);
+  sofaCushion.position.set(7.5, 20.85, 1.0);
+  pergolaGroup.add(sofaCushion);
+
+  const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(6.3, 1.4, 0.4), cushionMat);
+  sofaBack.position.set(7.5, 21.6, -0.05);
+  pergolaGroup.add(sofaBack);
+
+  // Modern low coffee table
+  const cTable = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.5, 1.8), materials.darkTeakWood);
+  cTable.position.set(7.5, 20.45, 4.5);
+  cTable.castShadow = true;
+  pergolaGroup.add(cTable);
+
+  // Planter boxes with snake plants and dwarf palm
+  for (let pbx of [2.0, 13.0]) {
+    const pBox = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.6, 1.6), materials.wallExterior);
+    pBox.position.set(pbx, 20.9, 10.5);
+    pBox.castShadow = true;
+    pergolaGroup.add(pBox);
+
+    const palmTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 2.5, 8), materials.darkTeakWood);
+    palmTrunk.position.set(pbx, 22.8, 10.5);
+    pergolaGroup.add(palmTrunk);
+
+    const palmFoliage = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.2, 7), new THREE.MeshStandardMaterial({ color: 0x226633, roughness: 0.8 }));
+    palmFoliage.position.set(pbx, 24.2, 10.5);
+    pergolaGroup.add(palmFoliage);
+  }
+
+  group.add(pergolaGroup);
+
+  // (E) Ground-Floor Modern Cantilevered Entrance Box Canopy
+  const porchBoxGeo = new THREE.BoxGeometry(15.4, 0.9, 5.6);
+  const porchBox = new THREE.Mesh(porchBoxGeo, materials.modernFasciaWhite);
+  porchBox.position.set(-7.3, 10.45, 14.8);
+  porchBox.castShadow = true;
+  group.add(porchBox);
+
+  // Stacked stone pillar supporting porch
+  const stoneCol = new THREE.Mesh(new THREE.BoxGeometry(1.2, 8.0, 1.2), materials.wallStone);
+  stoneCol.position.set(-13.8, 6.4, 14.6);
+  stoneCol.castShadow = true;
+  group.add(stoneCol);
+
+  // Porch LED downlights
+  const pSpot = new THREE.PointLight(0xfffaed, 1.2, 14);
+  pSpot.position.set(-7.3, 9.8, 14.8);
+  group.add(pSpot);
+
+  parent.add(group);
+  return group;
+}
+
+// =========================================================================
+// OPTION 3: TRADITIONAL PYRAMID PAVILION ROOF (KERALA / KONKAN HERITAGE)
+// Soaring 4-sided pyramid pavilion roof with central brass kalasham spire,
+// ornamental carved timber front dormer (Mukhappu / Koodu), and rain chains.
+// =========================================================================
+function buildPyramidHeritageRoof(parent) {
+  const group = new THREE.Group();
+
+  // (A) Soaring 4-Sided Pyramid Pavilion Roof Shell
+  // Eaves: X: -17.5 to +17.5, Z: -17.5 to +15.5 at Ye = 20.2
+  // Central Apex: X = 0, Y = 28.2, Z = -1.0 (Rise = 8.0 ft!)
+  const Ye = 20.2;
+  const Yr = 28.2;
+
+  const P_FL = new THREE.Vector3(-17.5, Ye,  15.5);
+  const P_FR = new THREE.Vector3( 17.5, Ye,  15.5);
+  const P_RR = new THREE.Vector3( 17.5, Ye, -17.5);
+  const P_RL = new THREE.Vector3(-17.5, Ye, -17.5);
+  const P_APEX = new THREE.Vector3(0, Yr, -1.0);
+
+  // 4 Triangular Slopes
+  const slopes = [
+    { tri: [P_FL, P_FR, P_APEX], type: 'front' },
+    { tri: [P_FR, P_RR, P_APEX], type: 'right' },
+    { tri: [P_RR, P_RL, P_APEX], type: 'rear' },
+    { tri: [P_RL, P_FL, P_APEX], type: 'left' }
+  ];
+
+  const posArr = [];
+  const uvArr = [];
+
+  for (let s of slopes) {
+    for (let pt of s.tri) {
+      posArr.push(pt.x, pt.y, pt.z);
+      if (s.type === 'front' || s.type === 'rear') {
+        uvArr.push((pt.x + 20) / 2.6, (pt.z + 20) / 2.6);
+      } else {
+        uvArr.push((pt.z + 20) / 2.6, (pt.y - 20.0) / 2.6);
+      }
+    }
+  }
+
+  const pyrGeo = new THREE.BufferGeometry();
+  pyrGeo.setAttribute('position', new THREE.Float32BufferAttribute(posArr, 3));
+  pyrGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvArr, 2));
+  pyrGeo.computeVertexNormals();
+
+  const pyrMesh = new THREE.Mesh(pyrGeo, materials.abhalmayaRoofTile);
+  pyrMesh.castShadow = true;
+  pyrMesh.receiveShadow = true;
+  group.add(pyrMesh);
+
+  // Matching Under-Soffit
+  const soffitPos = [];
+  for (let s of slopes) {
+    for (let pt of [s.tri[0], s.tri[2], s.tri[1]]) {
+      soffitPos.push(pt.x, pt.y - 0.25, pt.z);
+    }
+  }
+  const soffitGeo = new THREE.BufferGeometry();
+  soffitGeo.setAttribute('position', new THREE.Float32BufferAttribute(soffitPos, 3));
+  soffitGeo.computeVertexNormals();
+  const soffitMesh = new THREE.Mesh(soffitGeo, materials.whiteSoffit);
+  group.add(soffitMesh);
+
+  // (B) Sacred Brass Spire Finial (Thazhikakudam / Kalasham) at Apex
+  const finialGroup = new THREE.Group();
+  finialGroup.position.copy(P_APEX);
+
+  // Kalasham Pot Base
+  const basePot = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.48, 0.6, 16), materials.brassLamp);
+  basePot.position.y = 0.35;
+  finialGroup.add(basePot);
+
+  // Middle Ribbed Bulb
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 16), materials.brassLamp);
+  bulb.position.y = 0.85;
+  finialGroup.add(bulb);
+
+  // Tapering Lotus Spire Needle
+  const spire = new THREE.Mesh(new THREE.ConeGeometry(0.18, 1.4, 16), materials.brassLamp);
+  spire.position.y = 1.75;
+  finialGroup.add(spire);
+
+  group.add(finialGroup);
+
+  // (C) 4 Diagonal Semi-Cylindrical Terracotta Hip Caps from Apex to Corners
+  function addPyramidHipCap(p1, p2) {
+    const dir = new THREE.Vector3().subVectors(p2, p1);
+    const len = dir.length();
+    const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, len, 12), materials.roofRidge);
+    cap.position.copy(mid);
+    cap.position.y += 0.12;
+    cap.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    cap.castShadow = true;
+    group.add(cap);
+  }
+  addPyramidHipCap(P_APEX, P_FL);
+  addPyramidHipCap(P_APEX, P_FR);
+  addPyramidHipCap(P_APEX, P_RR);
+  addPyramidHipCap(P_APEX, P_RL);
+
+  // (D) Ornamental Front Wooden Gablette / Dormer (Mukhappu / Koodu)
+  // Positioned on the front slope: X = 0, Z = 9.0 to 15.8, Y = 20.2 to 25.2
+  const dormerGroup = new THREE.Group();
+  dormerGroup.position.set(0, 20.2, 12.4);
+
+  // Front triangular carved wooden pediment
+  const dPedGeo = new THREE.BufferGeometry();
+  const dPedVerts = new Float32Array([
+    -4.2, 0, 3.2,
+     4.2, 0, 3.2,
+     0.0, 4.2, 3.2
+  ]);
+  dPedGeo.setAttribute('position', new THREE.BufferAttribute(dPedVerts, 3));
+  dPedGeo.computeVertexNormals();
+  const dPedMesh = new THREE.Mesh(dPedGeo, materials.darkTeakWood);
+  dormerGroup.add(dPedMesh);
+
+  // Carved sunburst wooden louvers inside the dormer gable
+  for (let dy = 0.6; dy <= 3.4; dy += 0.5) {
+    const spanAtY = 8.4 * (1 - dy / 4.2);
+    const louver = new THREE.Mesh(new THREE.BoxGeometry(spanAtY, 0.08, 0.25), materials.teakWood);
+    louver.position.set(0, dy, 3.25);
+    dormerGroup.add(louver);
+  }
+
+  // Sloping dormer mini-hipped terracotta roof
+  for (let s of [-1, 1]) {
+    const dSlope = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.45, 6.8), materials.abhalmayaRoofTile);
+    dSlope.position.set(s * 2.2, 2.3, 0);
+    dSlope.rotation.z = s * THREE.MathUtils.degToRad(-35);
+    dSlope.castShadow = true;
+    dormerGroup.add(dSlope);
+  }
+  group.add(dormerGroup);
+
+  // (E) Traditional Eave Fascia & Carved Corner Brackets
+  function addPyramidFascia(p1, p2) {
+    const dir = new THREE.Vector3().subVectors(p2, p1);
+    const len = dir.length();
+    const ang = Math.atan2(dir.z, dir.x);
+    const midX = (p1.x + p2.x) / 2;
+    const midZ = (p1.z + p2.z) / 2;
+
+    const fascia = new THREE.Mesh(new THREE.BoxGeometry(len, 0.45, 0.15), materials.darkTeakWood);
+    fascia.position.set(midX, Ye, midZ);
+    fascia.rotation.y = -ang;
+    fascia.castShadow = true;
+    group.add(fascia);
+  }
+  addPyramidFascia(P_FL, P_FR);
+  addPyramidFascia(P_FR, P_RR);
+  addPyramidFascia(P_RR, P_RL);
+  addPyramidFascia(P_RL, P_FL);
+
+  // Carved wooden corner corbel brackets
+  for (let pt of [P_FL, P_FR, P_RR, P_RL]) {
+    const brk = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.8, 1.8), materials.darkTeakWood);
+    brk.position.set(pt.x * 0.9, Ye - 0.9, pt.z * 0.9);
+    brk.castShadow = true;
+    group.add(brk);
+
+    // Hanging solid brass rain chain from corner
+    buildRainChain(group, pt.x, Ye, pt.z);
+  }
+
+  parent.add(group);
+  return group;
+}
+
+// =========================================================================
+// OPTION 4: MODERN TROPICAL BUTTERFLY ROOF (INVERTED WING ECO-VILLA)
+// Inverted V-shape roof planes sloping down to a central drainage valley
+// with soaring outer eaves, ribbon clerestory glazing, and copper rainwater chute.
+// =========================================================================
+function buildModernButterflyRoof(parent) {
+  const group = new THREE.Group();
+
+  // Central low drainage valley trough along X = 0, Y = 20.8 ft, Z: -18.0 to +16.8 ft
+  // Left wing rises outward to X = -18.2, Y = 27.2 ft (Pitch = 20°)
+  // Right wing rises outward to X = +18.2, Y = 25.8 ft (Pitch = 16°)
+  
+  // (A) Left Wing Soaring Roof Slab (Covers Living Void & Mezzanine)
+  const leftWing = new THREE.Group();
+  leftWing.position.set(-9.1, 24.0, -0.6);
+  leftWing.rotation.z = THREE.MathUtils.degToRad(-19.5);
+
+  const lRoofGeo = new THREE.BoxGeometry(19.8, 0.55, 35.0);
+  const lRoof = new THREE.Mesh(lRoofGeo, materials.modernRoofDark);
+  lRoof.castShadow = true;
+  lRoof.receiveShadow = true;
+  leftWing.add(lRoof);
+
+  // Standing seam architectural ribs
+  for (let rx = -8.5; rx <= 8.5; rx += 2.2) {
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 35.0), materials.modernRoofDark);
+    rib.position.set(rx, 0.35, 0);
+    rib.castShadow = true;
+    leftWing.add(rib);
+  }
+
+  // Crisp white underside soffit
+  const lSoffit = new THREE.Mesh(new THREE.BoxGeometry(19.6, 0.15, 34.8), materials.modernFasciaWhite);
+  lSoffit.position.y = -0.32;
+  leftWing.add(lSoffit);
+
+  // Perimeter white fascia boards
+  for (let fz of [-17.5, 17.5]) {
+    const fBoard = new THREE.Mesh(new THREE.BoxGeometry(19.8, 1.25, 0.32), materials.modernFasciaWhite);
+    fBoard.position.set(0, 0, fz);
+    leftWing.add(fBoard);
+  }
+  const lOuterFascia = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.25, 35.0), materials.modernFasciaWhite);
+  lOuterFascia.position.set(-9.9, 0, 0);
+  leftWing.add(lOuterFascia);
+
+  group.add(leftWing);
+
+  // (B) Right Wing Soaring Roof Slab (Covers Bedrooms 2 & 3)
+  const rightWing = new THREE.Group();
+  rightWing.position.set(9.1, 23.3, -0.6);
+  rightWing.rotation.z = THREE.MathUtils.degToRad(15.5);
+
+  const rRoofGeo = new THREE.BoxGeometry(19.8, 0.55, 35.0);
+  const rRoof = new THREE.Mesh(rRoofGeo, materials.modernRoofDark);
+  rRoof.castShadow = true;
+  rRoof.receiveShadow = true;
+  rightWing.add(rRoof);
+
+  // Standing seam architectural ribs
+  for (let rx = -8.5; rx <= 8.5; rx += 2.2) {
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 35.0), materials.modernRoofDark);
+    rib.position.set(rx, 0.35, 0);
+    rib.castShadow = true;
+    rightWing.add(rib);
+  }
+
+  // Crisp white underside soffit
+  const rSoffit = new THREE.Mesh(new THREE.BoxGeometry(19.6, 0.15, 34.8), materials.modernFasciaWhite);
+  rSoffit.position.y = -0.32;
+  rightWing.add(rSoffit);
+
+  // Perimeter white fascia boards
+  for (let fz of [-17.5, 17.5]) {
+    const fBoard = new THREE.Mesh(new THREE.BoxGeometry(19.8, 1.25, 0.32), materials.modernFasciaWhite);
+    fBoard.position.set(0, 0, fz);
+    rightWing.add(fBoard);
+  }
+  const rOuterFascia = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.25, 35.0), materials.modernFasciaWhite);
+  rOuterFascia.position.set(9.9, 0, 0);
+  rightWing.add(rOuterFascia);
+
+  group.add(rightWing);
+
+  // (C) Central Inverted Rainwater Valley Trough & Architectural Copper Scupper Spout
+  const valleyTrough = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 35.2), materials.modernFasciaDark);
+  valleyTrough.position.set(0, 20.6, -0.6);
+  valleyTrough.castShadow = true;
+  group.add(valleyTrough);
+
+  // Projecting forward copper rainwater scupper spout (Z = 17.0 to 18.8 at Y = 20.4)
+  const copperMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.85, roughness: 0.25 });
+  const spout = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 2.2), copperMat);
+  spout.position.set(0, 20.4, 17.8);
+  spout.castShadow = true;
+  group.add(spout);
+
+  // Dual architectural brass rain chains cascading down into pebble basin
+  buildRainChain(group, -0.3, 20.2, 18.5);
+  buildRainChain(group,  0.3, 20.2, 18.5);
+
+  // (D) High Triangular Clerestory Ribbon Windows Under Outer Wings
+  // Left outer clerestory (X = -14.6, Y = 19.5 to 26.5)
+  const lClerestory = new THREE.Mesh(new THREE.BoxGeometry(0.25, 3.8, 26.0), materials.glassWindow);
+  lClerestory.position.set(-14.6, 23.4, -0.6);
+  group.add(lClerestory);
+
+  // Right outer clerestory (X = 14.6, Y = 19.5 to 25.2)
+  const rClerestory = new THREE.Mesh(new THREE.BoxGeometry(0.25, 3.2, 26.0), materials.glassWindow);
+  rClerestory.position.set(14.6, 22.8, -0.6);
+  group.add(rClerestory);
+
+  // (E) Watertight Front & Rear Triangular Gable Infill Walls
+  const fGableL = new THREE.Mesh(new THREE.BoxGeometry(14.6, 3.5, 0.8), materials.wallExterior);
+  fGableL.position.set(-7.3, 21.2, 9.6);
+  group.add(fGableL);
+
+  const fGableR = new THREE.Mesh(new THREE.BoxGeometry(14.6, 2.8, 0.8), materials.wallExterior);
+  fGableR.position.set(7.3, 20.9, 9.6);
+  group.add(fGableR);
+
+  // Cantilevered front porch flat canopy
+  const porchBoxGeo = new THREE.BoxGeometry(15.4, 0.85, 5.6);
+  const porchBox = new THREE.Mesh(porchBoxGeo, materials.modernFasciaWhite);
+  porchBox.position.set(-7.3, 10.45, 14.8);
+  porchBox.castShadow = true;
+  group.add(porchBox);
+
+  // Water tank on rear deck
+  buildSintexWaterTank(group, 4.5, 23.5, -10.5);
+
+  parent.add(group);
+  return group;
+}
+
 // Gable Truss Construction
 function buildGableTruss(parent, x, baseY, z, span, height, side) {
   const group = new THREE.Group();
@@ -3674,25 +4210,75 @@ function setFloorLevel(level) {
   }
 }
 
-// Roof Style Controller (Tri-Style: Abhalmaya Compound Hip, Modern Skillion, & Traditional Konkan)
-function setRoofStyle(style) {
-  state.roofStyle = style;
+// Roof Style Configuration (6 Distinct Architectural Options)
+const ROOF_STYLES = [
+  {
+    id: 'abhalmaya-compound',
+    name: 'Bungalow "आभाळमाया" Compound Hipped Roof',
+    shortName: 'Abhalmaya (Photo)',
+    tag: 'Photo Realization',
+    icon: '🏡',
+    description: 'Dual compound hipped Mangalore clay tile roof with warm cream plaster gable pediments, red decorative verge fascia, and deep cantilevered veranda over the grand balcony.',
+    highlights: ['Attached Photo Match', 'Cream Plaster Pediments', 'Glass Front Balustrade', 'Deep Veranda Eaves']
+  },
+  {
+    id: 'flat-box-terrace',
+    name: 'Plain Square Flat Roof & Rooftop Terrace',
+    shortName: 'Plain Square Flat Roof',
+    tag: 'Modern Box • User Choice',
+    icon: '🏙️',
+    description: 'Modern 30\' × 30\' reinforced concrete flat roof terrace with 3.2 ft waterproof coping parapets, glass safety front, staircase mumty headhouse, solar PV panels, and black aluminum pergola sky lounge.',
+    highlights: ['30\' × 30\' Usable Terrace', 'Pergola Sky Lounge', 'Solar PV Array & Tank', 'Staircase Mumty Access']
+  },
+  {
+    id: 'pyramid-heritage',
+    name: 'Traditional Pyramid Pavilion Roof (Chathura)',
+    shortName: 'Pyramid Heritage',
+    tag: 'Heritage Classic',
+    icon: '🛕',
+    description: '4-sided soaring 38° pyramid pavilion roof clad in kiln-fired Mangalore terracotta tiles, crowned with a sacred polished brass Kalasham finial spire, carved front dormer (Mukhappu), and brass rain chains.',
+    highlights: ['Sacred Brass Kalasham', 'Front Carved Dormer', 'Maximum Cyclone Defense', 'Carved Teakwood Railing']
+  },
+  {
+    id: 'modern-butterfly',
+    name: 'Contemporary Tropical Butterfly Roof',
+    shortName: 'Tropical Butterfly',
+    tag: 'Eco-Villa Architecture',
+    icon: '🦋',
+    description: 'Inverted dual wings sloping inward to a central drainage valley trough and copper scupper. High clerestory glass ribbons illuminate the living void with indirect natural light.',
+    highlights: ['Central Valley Rain Chute', 'Ribbon Clerestory Windows', 'Dual Brass Rain Chains', 'Dramatic Modern Profile']
+  },
+  {
+    id: 'modern-skillion',
+    name: 'Modern Split Skillion (Shed) Roof',
+    shortName: 'Modern Skillion',
+    tag: 'Contemporary Split-Level',
+    icon: '📐',
+    description: 'Dual counter-sloping mono-pitch shed roofs with high clerestory glass ribbon at the split level. Charcoal standing seam metal roofing with crisp white fascia overhangs.',
+    highlights: ['Split-Level Clerestory', 'Standing Seam Charcoal Metal', 'Passive Stack Heat Exhaust', 'Minimalist Fascia']
+  },
+  {
+    id: 'konkan-hipped',
+    name: 'Traditional Dual-Hipped Mangalore Tile Roof',
+    shortName: 'Konkan Hipped',
+    tag: 'Vernacular Classic',
+    icon: '🏮',
+    description: 'Heavy 38° double-hipped terracotta roof with clay ridge crestings, projecting eaves over the front porch, and traditional teakwood railings.',
+    highlights: ['Kiln-Fired Clay Tiles', 'Traditional Porch Awning', 'Carved Sagwan Wood Railing', 'High Rainfall Defense']
+  }
+];
+
+// Roof Style Controller
+function setRoofStyle(styleId) {
+  state.roofStyle = styleId;
   updateRoofStyleVisibility();
 
-  let label = 'Abhalmaya Compound Hipped Roof (Attached Image)';
-  let shortLabel = 'Abhalmaya (Photo)';
-  if (style === 'modern-skillion') {
-    label = 'Modern Split Skillion Roof (Image 1)';
-    shortLabel = 'Modern Skillion';
-  } else if (style === 'konkan-hipped') {
-    label = 'Traditional Konkan Hipped Clay Roof';
-    shortLabel = 'Konkan Hipped';
-  }
-  showToast('Switched to ' + label);
+  const styleObj = ROOF_STYLES.find(s => s.id === styleId) || ROOF_STYLES[0];
+  showToast(`Switched to: ${styleObj.name}`);
 
   const headerLabel = document.getElementById('roof-style-label');
   if (headerLabel) {
-    headerLabel.textContent = 'Roof: ' + shortLabel;
+    headerLabel.textContent = 'Roof: ' + styleObj.shortName;
   }
 
   const btnHeader = document.getElementById('btn-toggle-roof-style');
@@ -3705,26 +4291,106 @@ function setRoofStyle(style) {
     btnDock.classList.toggle('active', true);
     const spanText = btnDock.querySelector('.roof-text');
     if (spanText) {
-      spanText.textContent = shortLabel;
+      spanText.textContent = styleObj.shortName;
     }
   }
+
+  // Update modal cards if open
+  document.querySelectorAll('.roof-card').forEach(card => {
+    const isCurrent = card.getAttribute('data-style-id') === styleId;
+    card.classList.toggle('active', isCurrent);
+    const status = card.querySelector('.roof-card-status');
+    if (status) status.textContent = isCurrent ? 'Active' : 'Select';
+  });
 }
 
 function updateRoofStyleVisibility() {
   const isAbhalmaya = (state.roofStyle === 'abhalmaya-compound');
+  const isFlat = (state.roofStyle === 'flat-box-terrace');
+  const isPyramid = (state.roofStyle === 'pyramid-heritage');
+  const isButterfly = (state.roofStyle === 'modern-butterfly');
   const isModern = (state.roofStyle === 'modern-skillion');
   const isKonkan = (state.roofStyle === 'konkan-hipped');
 
   if (abhalmayaRoofGroup) abhalmayaRoofGroup.visible = isAbhalmaya;
+  if (flatRoofGroup) flatRoofGroup.visible = isFlat;
+  if (pyramidRoofGroup) pyramidRoofGroup.visible = isPyramid;
+  if (butterflyRoofGroup) butterflyRoofGroup.visible = isButterfly;
   if (modernRoofGroup) modernRoofGroup.visible = isModern;
   if (konkanRoofGroup) konkanRoofGroup.visible = isKonkan;
-  if (porchKonkanRoof) porchKonkanRoof.visible = isKonkan;
 
-  if (frontBalustradeGlassGroup) frontBalustradeGlassGroup.visible = isAbhalmaya;
-  if (frontBalustradeTeakGroup) frontBalustradeTeakGroup.visible = !isAbhalmaya;
-  if (modernBalcPostsGroup) modernBalcPostsGroup.visible = isModern;
+  // Porch awning: Traditional clay tile porch canopy only for traditional styles (konkan and pyramid)
+  if (porchKonkanRoof) porchKonkanRoof.visible = (isKonkan || isPyramid);
+
+  // Balustrade styles:
+  // Glass balustrade for Abhalmaya, Flat Terrace, Butterfly, Modern Skillion
+  // Teakwood balustrade for Traditional Konkan and Heritage Pyramid
+  const useGlassBalustrade = (isAbhalmaya || isFlat || isButterfly || isModern);
+  if (frontBalustradeGlassGroup) frontBalustradeGlassGroup.visible = useGlassBalustrade;
+  if (frontBalustradeTeakGroup) frontBalustradeTeakGroup.visible = !useGlassBalustrade;
+
+  // Modern balcony steel posts:
+  if (modernBalcPostsGroup) modernBalcPostsGroup.visible = (isModern || isButterfly);
+
+  // Plaque group (आभाळमाया on front parapet):
   if (abhalmayaPlaqueGroup) abhalmayaPlaqueGroup.visible = isAbhalmaya;
-  if (balconyBistroFurnitureGroup) balconyBistroFurnitureGroup.visible = !isAbhalmaya;
+
+  // Bistro furniture on grand balcony:
+  if (balconyBistroFurnitureGroup) balconyBistroFurnitureGroup.visible = true;
+}
+
+// Roof Selection Modal Helpers
+function openRoofModal() {
+  const modal = document.getElementById('roof-modal');
+  if (modal) {
+    modal.classList.add('open');
+    renderRoofSelectorGrid();
+  }
+}
+
+function closeRoofModal() {
+  const modal = document.getElementById('roof-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function renderRoofSelectorGrid() {
+  const container = document.getElementById('roof-selector-grid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  ROOF_STYLES.forEach(style => {
+    const card = document.createElement('div');
+    const isActive = (state.roofStyle === style.id);
+    card.className = 'roof-card' + (isActive ? ' active' : '');
+    card.setAttribute('data-style-id', style.id);
+
+    const highlightsHtml = style.highlights.map(h => `<span class="roof-card-tag">${h}</span>`).join('');
+
+    card.innerHTML = `
+      <div class="roof-card-header">
+        <div class="roof-card-icon">${style.icon}</div>
+        <div style="flex: 1;">
+          <div class="roof-card-title">${style.name}</div>
+          <span class="roof-card-tag" style="background: rgba(226, 98, 68, 0.2); color: #ff8c6b;">${style.tag}</span>
+        </div>
+        <span class="roof-card-status">${isActive ? 'Active' : 'Select'}</span>
+      </div>
+      <div class="roof-card-desc">${style.description}</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;">
+        ${highlightsHtml}
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      setRoofStyle(style.id);
+      renderRoofSelectorGrid();
+      setTimeout(() => {
+        closeRoofModal();
+      }, 250);
+    });
+
+    container.appendChild(card);
+  });
 }
 
 function setLightingMode(mode) {
@@ -3935,17 +4601,39 @@ function setupEventListeners() {
   // X-Ray Mode
   document.getElementById('btn-xray').addEventListener('click', toggleXray);
 
-  // Roof Style 3-Way Cycle (Abhalmaya Compound Hip -> Modern Skillion -> Traditional Konkan)
-  const roofCycle = ['abhalmaya-compound', 'modern-skillion', 'konkan-hipped'];
+  // Roof Style 6-Way Cycle & Modal Triggers
+  const roofCycle = [
+    'abhalmaya-compound',
+    'flat-box-terrace',
+    'pyramid-heritage',
+    'modern-butterfly',
+    'modern-skillion',
+    'konkan-hipped'
+  ];
   const handleRoofStyleToggle = () => {
     const currentIndex = roofCycle.indexOf(state.roofStyle);
     const nextIndex = (currentIndex + 1) % roofCycle.length;
     setRoofStyle(roofCycle[nextIndex]);
   };
+
   const btnRoofHeader = document.getElementById('btn-toggle-roof-style');
   if (btnRoofHeader) btnRoofHeader.addEventListener('click', handleRoofStyleToggle);
+
+  const btnOpenRoofModal = document.getElementById('btn-open-roof-modal');
+  if (btnOpenRoofModal) btnOpenRoofModal.addEventListener('click', openRoofModal);
+
   const btnRoofDock = document.getElementById('btn-dock-roof-style');
-  if (btnRoofDock) btnRoofDock.addEventListener('click', handleRoofStyleToggle);
+  if (btnRoofDock) btnRoofDock.addEventListener('click', openRoofModal);
+
+  const btnCloseRoofModal = document.getElementById('btn-close-roof-modal');
+  if (btnCloseRoofModal) btnCloseRoofModal.addEventListener('click', closeRoofModal);
+
+  const roofModal = document.getElementById('roof-modal');
+  if (roofModal) {
+    roofModal.addEventListener('click', (e) => {
+      if (e.target === roofModal) closeRoofModal();
+    });
+  }
 
   // Room Pills Click
   document.querySelectorAll('.room-pill').forEach(pill => {
@@ -4020,6 +4708,7 @@ function setupEventListeners() {
     if (e.key === 'Escape') {
       closeLightbox();
       modal.classList.remove('open');
+      closeRoofModal();
     }
   });
 

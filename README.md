@@ -30,25 +30,42 @@
   - **Windowless Wall Architecture:** Faithful to CAD Drawing A100, Bedroom 3 has no windows on its side or rear walls, providing quiet thermal insulation and illuminating the space purely through the grand French balcony door.
 - **Upper Mezzanine Gallery & Passage:** Bridge walkway overlooking the grand living room void below.
 
-### 3. Roof Architecture (Interactive Tri-Style Selector)
-- **Bungalow "आभाळमाया" Compound Hipped Roof (Attached Photo Design):**
-  - **L-Shaped Compound Hipped Terracotta Roof:** Direct architectural match of the reference bungalow photo.
-  - **Forward-Projecting Balcony Canopy:** Deep hipped canopy over the left wing/balcony supported by a square architectural corner pillar with under-soffit ceiling and recessed warm spotlight.
-  - **Open Sky Sun Terrace:** Recessed right roof leaving Bedroom 2's front terrace open to the sky as an outdoor sun deck and stargazing terrace.
-  - **Decorative White Scalloped Lace Eaves Trim:** Continuous crisp white fretwork valance (lambrequin) trim along all eaves.
-  - **Modern Clear Glass Balustrades:** Clear tempered glass railing with stainless steel top handrail, stanchions, and glass clamps.
-  - **Devanagari "आभाळमाया" Nameplate:** Custom engraved plaque mounted above the ground floor stone wall.
-- **Modern Split Skillion (Shed) Roof:**
-  - **Asymmetrical Split-Level Mono-Pitch Planes:** High left shed roof (17.5° pitch rising to 27.6 ft) over the living void and mezzanine, paired with a lower offset right shed roof (13.5° pitch) over Bedrooms 2 & 3.
-  - **Continuous Vertical Clerestory:** 33 ft long step featuring architectural ribbon glazing and dark aluminum mullions providing passive daylight into the core.
-  - **Crisp Modern Fascia & Soffits:** Wide white fascia boards with dark architectural reveal grooves and recessed LED soffit downlights over the open grand balcony.
-  - **Cantilevered Box Porch Canopy:** Deep floating entrance slab with stacked stone-clad pillar and white vertical privacy louvers.
-- **Traditional Coastal Konkan Hipped Roof:**
-  - **38° Steep Sloping Pitch:** Dual-hipped authentic Mangalore terracotta clay tiles engineered for heavy coastal monsoons (>3,500 mm rainfall).
-  - **Deep 3.5 ft Overhanging Eaves (Chajjas):** Protects exterior plastered walls and open wooden balconies from aggressive driving rains.
-  - **Ornamental Dormer Vent (*Koodu / Gablette*):** Triangular ventilation louver at the upper balcony ridge apex.
-  - **Brass Rain Chains (*Kusari*):** Suspended from eave corners down to drainage basins for graceful rainwater management.
-  - **Hand-Carved Sagwan Balusters:** Traditional turned teakwood balustrade rails.
+### 3. Roof Architecture (Interactive 6-Style Architectural Selector)
+The visualizer includes **6 distinct roof architectures** that can be switched with 1 click or selected via the interactive modal gallery:
+1. **Bungalow "आभाळमाया" Compound Hipped Roof (Attached Photo Reference):**
+   - **L-Shaped Compound Hipped Mangalore Roof:** Architectural match of the reference bungalow photo with warm cream plaster gable pediments.
+   - **Cantilevered Veranda Eaves:** Deep hipped canopy over the single grand balcony supported by a square corner pillar with under-soffit ceiling and recessed warm spotlight.
+   - **Decorative Red Verge Fascia & Lace Eaves:** Continuous ornamental valance trim along all perimeter eaves.
+   - **Modern Clear Glass Balustrades:** Clear tempered glass railing with stainless steel top handrail and stanchions.
+   - **Devanagari "आभाळमाया" Nameplate:** Custom engraved plaque mounted above the ground floor stone wall.
+2. **Plain Square Flat Roof & Rooftop Terrace (User Choice • Modern Box):**
+   - **30' × 30' Usable Rooftop Terrace:** Reinforced concrete slab with outdoor paver tiles, waterproof coping, and 3.2 ft perimeter parapet walls.
+   - **Glass Safety Front Railing:** Tempered glass viewing panel providing panoramic valley views.
+   - **Staircase Mumty Headhouse:** Rooftop access enclosure with frosted glass door and dark coping.
+   - **Black Aluminum Pergola Sky Lounge:** Slatted timber-style modern pergola with outdoor sectional sofa, coffee table, and potted palms.
+   - **Eco Utilities:** Angled 3-panel solar photovoltaic array and 1,000L Sintex water storage tank.
+   - **Modern Cantilevered Box Canopy:** Minimalist floating porch slab with warm recessed downlight.
+3. **Traditional Pyramid Pavilion Roof (Chathura / Mukhappu):**
+   - **4-Sided Soaring 38° Pyramid Pavilion:** Symmetrical hipped clay tile pyramid rising from eaves at 20.2 ft to a central apex at 28.2 ft.
+   - **Sacred Polished Brass Kalasham:** Traditional temple-style spire finial crowning the summit apex.
+   - **Carved Front Wooden Dormer (*Mukhappu*):** Triangular timber dormer with sunburst fretwork louvers for natural attic stack ventilation.
+   - **Ornamental Brass Rain Chains (*Kusari*):** Hanging from all four corners to channel monsoon rain into river-stone drainage basins.
+   - **Hand-Carved Sagwan Railings:** Traditional turned teakwood balustrades on the grand first-floor balcony.
+4. **Contemporary Tropical Butterfly Roof (Inverted Wings):**
+   - **Inverted V-Profile Dual Wings:** Left wing (soaring to 27.2 ft) and right wing (rising to 25.8 ft) sloping inward to a central drainage trough at X = 0.
+   - **Central Rain Chute & Copper Scupper:** Channels torrential coastal rainfall toward a front drainage spout with dual brass rain chains.
+   - **High Clerestory Ribbon Glazing:** Continuous clerestory glass beneath the soaring eaves floods the double-height living room with glare-free daylight.
+   - **Standing Seam Charcoal Metal Roofing:** High-grade architectural metal sheets with crisp white fascia boards.
+5. **Modern Split Skillion (Shed) Roof:**
+   - **Asymmetrical Split-Level Mono-Pitch Planes:** High left shed roof (17.5° pitch rising to 27.6 ft) over the living void and mezzanine, paired with a lower offset right shed roof (13.5° pitch) over Bedrooms 2 & 3.
+   - **Continuous Vertical Clerestory:** 33 ft long step featuring architectural ribbon glazing and dark aluminum mullions providing passive daylight into the core.
+   - **Crisp Modern Fascia & Soffits:** Wide white fascia boards with dark architectural reveal grooves and recessed LED soffit downlights.
+   - **Cantilevered Box Porch Canopy:** Deep floating entrance slab with stacked stone-clad pillar.
+6. **Traditional Coastal Konkan Dual-Hipped Roof:**
+   - **38° Steep Sloping Pitch:** Dual-hipped authentic Mangalore terracotta clay tiles engineered for heavy coastal monsoons (>3,500 mm rainfall).
+   - **Deep 3.5 ft Overhanging Eaves (Chajjas):** Protects exterior plastered walls and open wooden balconies from aggressive driving rains.
+   - **Traditional Porch Tile Awning:** Sloping terracotta canopy extending over the front Padwi sit-out.
+   - **Hand-Carved Sagwan Balusters:** Traditional turned teakwood balustrade rails.
 
 ---
 

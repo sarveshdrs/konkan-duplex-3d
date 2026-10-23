@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chiplun Konkan Duplex House - 3D Architectural Visualizer</title>
   <meta name="description" content="Interactive 3D Architectural Design for Chiplun Family Home Konkan style duplex with rain-proof slanted terracotta roofs, open-to-below living room, and authentic timber craftsmanship.">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3.4">
   <!-- Three.js and OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -41,8 +41,11 @@
         </div>
 
         <div class="header-actions">
-          <button class="pill-btn active" id="btn-toggle-roof-style" title="Switch Roof Design (1-Click Cycle: Abhalmaya Photo Style, Modern Skillion, Traditional Konkan)">
+          <button class="pill-btn active" id="btn-toggle-roof-style" title="Switch Roof Design (1-Click Cycle: 6 Options including Plain Square Flat Roof)">
             <span>📐</span> <span id="roof-style-label">Roof: Abhalmaya (Photo)</span>
+          </button>
+          <button class="pill-btn" id="btn-open-roof-modal" title="Open Roof Design Selector (6 Architectural Styles)">
+            <span>🏛️</span> <span>Roofs (6)</span>
           </button>
           <button class="pill-btn" id="btn-toggle-rain">
             <span>🌧️</span> <span id="rain-btn-text">Monsoon Rain: OFF</span>
@@ -307,6 +310,20 @@
 
       </div>
     </aside>
+  <!-- Modal for Roof Design Selection (6 Architectural Options) -->
+  <div class="modal-overlay" id="roof-modal">
+    <div class="modal-content" style="max-width: 960px;">
+      <div class="modal-header">
+        <div>
+          <h3>📐 Select Architectural Roof Design</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Choose from 6 distinctive roof architectures tailored for the Chiplun 30' × 30' Duplex</p>
+        </div>
+        <button class="modal-close" id="btn-close-roof-modal">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div class="roof-grid" id="roof-selector-grid"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Gallery for Photorealistic Renders & Plan Comparison -->
@@ -448,6 +465,6 @@
   </div>
 
   <!-- App Script -->
-  <script src="app.js?v=3.3"></script>
+  <script src="app.js?v=3.4"></script>
 </body>
 </html>
